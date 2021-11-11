@@ -1,0 +1,33 @@
+{
+    "include": [
+      "cibo",
+      "demo"
+    ],
+    "ignore": [
+      "venv",
+      "stubs"
+    ],
+    "stubPath": "stubs",
+    "pythonVersion": "3.7",
+    "pythonPlatform": "Linux",
+    "strictListInference": true,
+    "strictDictionaryInference": true,
+    "reportImportCycles": "none",
+    "reportUnusedClass": "warning",
+    "reportTypeshedErrors": "error",
+    "reportMissingImports": "error",
+    "reportUnusedImport": "warning",
+    "reportUnusedVariable": "warning",
+    "reportUnusedFunction": "warning",
+    "reportDuplicateImport": "warning",
+    "reportGeneralTypeIssues": "error",
+    "reportMissingTypeStubs": "warning",
+    "reportAssertAlwaysTrue": "warning",
+    "reportMissingModuleSource": "none",
+    "reportFunctionMemberAccess": "error",
+    "reportSelfClsParameterName": "warning",
+    "reportCallInDefaultInitializer": "error",
+    "reportIncompatibleMethodOverride": "error",
+    "reportImplicitStringConcatenation": "error",
+    "reportInvalidStringEscapeSequence": "error"
+  }
