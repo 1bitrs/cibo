@@ -1,0 +1,70 @@
+{
+    // "python.condaPath": "/home/yangfan/miniconda3/envs/cibo/bin",  
+    // "python.pythonPath": "/home/yangfan/miniconda3/envs/cibo/bin/python",
+    // "python.defaultInterpreterPath": "/home/yangfan/miniconda3/envs/cibo/bin/python",
+    "terminal.integrated.defaultProfile.osx": "zsh",
+    "terminal.integrated.defaultProfile.linux": "zsh",
+    "python.languageServer": "None",
+    "editor.suggestSelection": "recentlyUsedByPrefix",
+    "editor.formatOnSave": false,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": false,
+      "source.organizeImports": false
+    },
+    "search.exclude": {
+      "**/stubs": true,
+      "**/venv": true,
+      "**/.gitlab": true,
+      "**/.mypy_cache": true,
+    },
+    "files.exclude": {
+      "**/.git": true,
+      "**/__pycache__": true,
+      "pm2": false,
+      "stubs": true,
+      "venv": false,
+      "**/.gitlab": false,
+      "**/.mypy_cache": false,
+      "build": false,
+      "dist": false,
+      "*.egg-info": false,
+    },
+    "files.watcherExclude": {
+      "**/.git": true,
+      "**/.gitlab": true,
+      "**/.mypy_cache": true,
+      "**/stubs": true,
+      "**/venv": true,
+    },
+    "editor.fontFamily": "Consolas, Monospace",
+    "editor.fontSize": 14,
+    "editor.tokenColorCustomizations": {
+      "textMateRules": [
+        {
+          "scope": "meta.function-call.generic.python",
+          "settings": {
+            "foreground": "#66D9EF",
+          }
+        },
+      ]
+    },
+    "python.linting.lintOnSave": false,
+    "python.analysis.stubPath": "stubs",
+    "python.analysis.diagnosticMode": "workspace",
+    "python.testing.pytestEnabled": false,
+    "python.linting.enabled": false,
+    "python.analysis.disabled": [
+      "inherit-non-class"
+    ],
+    "python.analysis.typeCheckingMode": "basic",
+    "python.autoComplete.showAdvancedMembers": false,
+    "python.formatting.provider": "black",
+    "python.sortImports.args": [
+      "--sp",
+      "${workspaceFolder}/pyproject.toml",
+    ],
+    "git.ignoreLimitWarning": true,
+    "[python]": {
+      "editor.defaultFormatter": "ms-python.python"
+    }
+  }

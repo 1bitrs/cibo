@@ -1,3 +1,5 @@
+from typing import Dict, List, Optional
+
 from cibo import BaseApiBody, BaseApiQuery, Handler, SimpleContext
 
 from ..exceptions import AuthException
@@ -22,9 +24,11 @@ class EchoHandler(Handler):
 
     class Query(BaseApiQuery):
         a: str
+        b: Optional[List[int]]
+        c: Optional[Dict[str, int]]
 
     class Body(BaseApiBody):
-        b: int
+        d: int
 
     def handle(self, context: SimpleContext, query: Query, body: Body):
-        return context.success(data=f"{query.a}, {body.b}")
+        return context.success(data=f"a: {query.a}, b: {query.b}, c: {query.c}, d: {body.d}")

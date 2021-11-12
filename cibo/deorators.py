@@ -24,6 +24,8 @@ def inject_context_to_g_decorator(cls: Type[Handler]) -> Callable:
 
 
 def inject_args_decorator(cls: Type[Handler]) -> Callable:
+    """inject body & query"""
+
     def decorator(fn):
         view_func = getattr(cls, cls.handle_func_name)
         sig = inspect.signature(view_func, follow_wrapped=True)
