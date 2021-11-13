@@ -28,6 +28,12 @@ class EchoHandler(Handler):
 
 ```
 
+## Dev
+pull `stubs` files
+```shell
+git submodule update --init --recursive
+```
+
 ## Docs
 [http://127.0.0.1:5000/docs](http://127.0.0.1:5000/docs)
 
