@@ -5,7 +5,7 @@ python:
   - "3.7.5"
 
 before_script:
-  - apt install npm
+  - sudo apt install npm
   - npm install n -g
   - sudo n lts
   - sudo npm install -g pyright@1.1.86
