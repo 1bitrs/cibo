@@ -5,7 +5,19 @@ python:
   - "3.7.5"
 
 before_script:
+  - apt install npm
+  - npm install n -g
+  - sudo n lts
+  - sudo npm install -g pyright@1.1.86
   - python -V
+
+# Handle git submodules yourself
+git:
+    submodules: false
+# Use sed to replace the SSH URL with the public URL, then initialize submodules
+before_install:
+    - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+    - git submodule update --init --recursive
 
 lint:
   stage: build
