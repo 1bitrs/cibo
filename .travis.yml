@@ -27,6 +27,7 @@ script:
     - black -v demo --check
     - black -v scripts --check
     - isort --check "cibo/" "demo/" "scripts/"
+    - pyright
 
 # lint:
 #   stage: build
