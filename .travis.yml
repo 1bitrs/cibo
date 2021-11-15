@@ -7,7 +7,6 @@ python:
 
 before_script:
   - sudo apt update
-  - sudo apt upgrade
   - sudo apt install npm
   - npm install n -g
   - sudo n lts
