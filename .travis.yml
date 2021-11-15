@@ -1,17 +1,17 @@
 os: linux
 dist: xenial
-language: python, node_js
+language: python
 sudo: required
 python:
   - "3.7.5"
-node_js:
-  - "16.13.0"
 
 before_script:
-  - sudo apt update
-  - sudo apt install npm
-  - sudo npm install n -g
-  - sudo n lastest
+#   - sudo apt update
+#   - sudo apt install npm
+#   - sudo npm install n -g
+#   - sudo n lastest
+  - curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+  - sudo apt-get install -y nodejs
   - node -v
   - sudo npm install -g pyright@1.1.86
   - python -V
