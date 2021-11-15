@@ -23,8 +23,8 @@ def handle_internal_server_error(e: InternalServerError):
     return ErrorContext().error("服务器错误", e.code)
 
 
-def _register_bp():
-    from . import echo_handler, health_check_handler  # type: ignore
+def _binding_route_rule():
+    from . import echo_handler, health_check_handler, user_handler  # type: ignore
 
 
-_register_bp()
+_binding_route_rule()

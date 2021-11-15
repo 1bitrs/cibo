@@ -9,23 +9,63 @@ python setup.py install
 ```
 
 ## Usage
+### Basic
 ```python
 from cibo import Handler, SimpleContext, Blueprint, BaseApiQuery, BaseApiBody
 
 api = Blueprint("api")
 
-@api.get("/echo")
+@api.post("/echo")
 class EchoHandler(Handler):
 
+    decorators = [token_auth]
+
     class Query(BaseApiQuery):
-        str1: str
+        a: str
+        b: Optional[List[int]]
+        c: Optional[Dict[str, int]]
 
     class Body(BaseApiBody):
-        str2: str
+        d: Set[int]
+        e: Tuple[Dict[int, List], Dict[int, List]]
 
     def handle(self, context: SimpleContext, query: Query, body: Body):
-        return context.success(msg=f"{query.str1}, {body.str2}")
+        """echo the recevied params"""
+        return context.success(
+            data=f"a: {query.a}, b: {query.b}, c: {query.c}, d: {body.d}, e: {body.e}"
+        )
 
+```
+### Advance
+```python
+@api.post("/user")
+class UserHandler(Handler):
+    class Body(BaseApiBody):
+        class User(BaseModel):
+            name: str = Field(description="姓名")
+            emails: Optional[List[str]] = Field(description="邮箱")
+
+            @classmethod
+            def validate(cls, value: Any):
+                obj = cls(**value)
+                if obj.emails:
+                    if not all(
+                        [
+                            re.match(
+                                r"^[0-9a-zA-Z_]{0,19}@[0-9a-zA-Z]{1,13}\.[com,cn,net]{1,3}$", email
+                            )
+                            for email in obj.emails
+                        ]
+                    ):
+                        raise ValueError("email is not valid")
+                return obj
+
+        user: User
+        inviter: str
+
+    def handle(self, context: SimpleContext, body: Body):
+        """custom model and validate"""
+        return context.success(user=body.user, inviter=body.inviter)
 ```
 
 ## Dev

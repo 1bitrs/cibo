@@ -18,7 +18,7 @@ class BaseApiBody(BaseApiArgs):
 class BaseApiQuery(BaseApiArgs):
     @classmethod
     def parse_request_args(cls, query: ImmutableMultiDict) -> "BaseApiQuery":
-        obj_dict = dict(query).copy()
+        obj_dict = dict(query)
         for field_name, field in cls.__fields__.items():
             if hasattr(field.outer_type_, "__origin__") and field.outer_type_.__origin__ in (
                 list,

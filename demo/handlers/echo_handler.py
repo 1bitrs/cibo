@@ -1,20 +1,8 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Set, Tuple
 
 from cibo import BaseApiBody, BaseApiQuery, Handler, SimpleContext
-
-from ..exceptions import AuthException
-from . import api
-
-
-def token_auth(fn):
-    def wrapper(*args, **kwargs):
-        from flask import request
-
-        if request.headers.get("token", None) != "123":
-            raise AuthException("Fail to get access")
-        return fn(*args, **kwargs)
-
-    return wrapper
+from demo.auth import token_auth
+from demo.handlers import api
 
 
 @api.post("/echo")
@@ -28,7 +16,11 @@ class EchoHandler(Handler):
         c: Optional[Dict[str, int]]
 
     class Body(BaseApiBody):
-        d: int
+        d: Set[int]
+        e: Tuple[Dict[int, List], Dict[int, List]]
 
     def handle(self, context: SimpleContext, query: Query, body: Body):
-        return context.success(data=f"a: {query.a}, b: {query.b}, c: {query.c}, d: {body.d}")
+        """echo the recevied params"""
+        return context.success(
+            data=f"a: {query.a}, b: {query.b}, c: {query.c}, d: {body.d}, e: {body.e}"
+        )

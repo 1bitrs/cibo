@@ -1,6 +1,5 @@
 from cibo import Handler, SimpleContext
-
-from . import api
+from demo.handlers import api
 
 
 @api.get("/ping")
