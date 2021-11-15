@@ -41,8 +41,6 @@ jobs:
         with:
           # Version of pyright to run. If not specified, the latest version will be used.
           version: 1.1.86
-          # Analyze for a specific platform (Darwin, Linux, Windows).
-          python-platform: Linux
           # Analyze for a specific version (3.3, 3.4, etc.).
           python-version: 3.7.5
           # Use typeshed type stubs at this location.
