@@ -20,14 +20,7 @@ before_install:
     - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
     - git submodule update --init --recursive
 
-lint:
-  stage: build
-  script:
-    - pyright
-
-format:
-  stage: build
-  script:
+script: 
     - pip install -q -i https://mirrors.cloud.tencent.com/pypi/simple black==20.8b1
     - pip install -q -i https://mirrors.cloud.tencent.com/pypi/simple isort==5.6.4
     - black -v app --check
@@ -35,3 +28,19 @@ format:
     - black -v handler_cls --check
     - black -v specs --check
     - isort --check "cibo/" "demo/" "scripts/"
+
+# lint:
+#   stage: build
+#   script:
+#     - pyright
+
+# format:
+#   stage: build
+#   script:
+#     - pip install -q -i https://mirrors.cloud.tencent.com/pypi/simple black==20.8b1
+#     - pip install -q -i https://mirrors.cloud.tencent.com/pypi/simple isort==5.6.4
+#     - black -v app --check
+#     - black -v scripts --check
+#     - black -v handler_cls --check
+#     - black -v specs --check
+#     - isort --check "cibo/" "demo/" "scripts/"
