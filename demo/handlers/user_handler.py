@@ -1,5 +1,5 @@
 import re
-from typing import Any, List, Optional
+from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -15,7 +15,7 @@ class UserHandler(Handler):
             emails: Optional[List[str]] = Field(description="邮箱")
 
             @classmethod
-            def validate(cls, value: Any):
+            def validate(cls, value: Dict):
                 obj = cls(**value)
                 if obj.emails:
                     if not all(
@@ -31,6 +31,7 @@ class UserHandler(Handler):
 
         user: User
         inviter: str
+        invitees: List[str]
 
     def handle(self, context: SimpleContext, body: Body):
-        return context.success(user=body.user, inviter=body.inviter)
+        return context.success(user=body.user, inviter=body.inviter, invitees=body.invitees)

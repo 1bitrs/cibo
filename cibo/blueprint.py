@@ -2,11 +2,7 @@ from typing import Type
 
 from flask.blueprints import Blueprint as _Blueprint
 
-from .deorators import (
-    inject_args_decorator,
-    inject_context_decorator,
-    inject_context_to_g_decorator,
-)
+from .deorators import inject_args_decorator, inject_context_decorator
 from .handler import Handler
 
 
@@ -35,7 +31,6 @@ class Blueprint(_Blueprint):
 
         decorators.extend(
             [
-                inject_context_to_g_decorator(cls),
                 inject_context_decorator(cls),
                 inject_args_decorator(cls),
             ]

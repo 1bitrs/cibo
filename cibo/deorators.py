@@ -9,20 +9,6 @@ from .args import BaseApiBody, BaseApiQuery
 from .handler import Handler
 
 
-def inject_context_to_g_decorator(cls: Type[Handler]) -> Callable:
-    def decorator(fn):
-        @wraps(fn)
-        def wrapper(*args, **kwargs):
-            _context = kwargs.get("context")
-            if _context:
-                g._context = _context
-            return fn(*args, **kwargs)
-
-        return wrapper
-
-    return decorator
-
-
 def inject_args_decorator(cls: Type[Handler]) -> Callable:
     """inject body & query"""
 
@@ -67,8 +53,14 @@ def inject_args_decorator(cls: Type[Handler]) -> Callable:
                 query = request.args
                 parameters["query"] = Query.parse_request_args(query)  # type:ignore
             if "body" in parameter_map:
-                body = dict(request.json) if request.json else {}
-                parameters["body"] = parameter_map["body"].parse_obj(body)
+                if request.content_type == "application/json":
+                    body = dict(request.json) if request.json else {}
+                    parameters["body"] = Body.parse_obj(body)
+                elif request.content_type == "application/x-www-form-urlencoded":
+                    body = Body.parse_form_args(request.form) if request.form else {}  # type:ignore
+                    parameters["body"] = body
+                else:
+                    parameters["body"] = {}
 
             return fn(*args, **kwargs, **parameters)
 
@@ -81,11 +73,9 @@ def inject_context_decorator(cls: Type[Handler]) -> Callable:
     def decorator(fn):
         @wraps(fn)
         def wrapper(*args, **kwargs):
-            context_cls = cls.context_cls
-            context = context_cls()
-            kwargs["context"] = context
+            context = cls.context_cls()
             g._context = context
-            return fn(*args, **kwargs)
+            return fn(*args, context=context, **kwargs)
 
         return wrapper
 

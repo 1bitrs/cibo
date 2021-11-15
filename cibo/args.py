@@ -12,7 +12,20 @@ class BaseApiArgs(BaseModel):
 
 
 class BaseApiBody(BaseApiArgs):
-    ...
+    @classmethod
+    def parse_form_args(cls, form: ImmutableMultiDict) -> "BaseApiBody":
+        obj_dict = dict(form)
+        for field_name, field in cls.__fields__.items():
+            if field.outer_type_ not in (str, list, set, tuple, dict):
+                _name = field.alias or field_name
+                _value: Optional[str] = form.get(_name, None)
+                if _value is not None:
+                    if re.match(r"\[.*\]", _value):
+                        obj_dict[_name] = literal_eval(_value)
+                    elif re.match(r"{.*}", _value):
+                        obj_dict[_name] = json.loads(_value)
+
+        return cls.parse_obj(obj_dict)
 
 
 class BaseApiQuery(BaseApiArgs):
