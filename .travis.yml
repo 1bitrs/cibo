@@ -1,0 +1,25 @@
+os: linux
+dist: xenial
+language: python
+python:
+  - "3.7.5"
+
+before_script:
+  - python -V
+  - git submodule update --init --recursive
+
+lint:
+  stage: build
+  script:
+    - pyright
+
+format:
+  stage: build
+  script:
+    - pip install -q -i https://mirrors.cloud.tencent.com/pypi/simple black==20.8b1
+    - pip install -q -i https://mirrors.cloud.tencent.com/pypi/simple isort==5.6.4
+    - black -v app --check
+    - black -v scripts --check
+    - black -v handler_cls --check
+    - black -v specs --check
+    - isort --check "cibo/" "demo/" "scripts/"
