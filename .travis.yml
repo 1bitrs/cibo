@@ -9,7 +9,6 @@ before_script:
   - sudo apt update
   - sudo apt install npm
   - npm install n -g
-  - sudo n lts
   - sudo npm install -g pyright@1.1.86
   - python -V
 
