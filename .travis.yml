@@ -4,7 +4,7 @@ language: python
 python:
   - "3.7.5"
 
-# Handle git submodules yourself
+# Handle git submodules
 git:
     submodules: false
 # Use sed to replace the SSH URL with the public URL, then initialize submodules
@@ -28,4 +28,4 @@ script:
     - black -v demo --check
     - black -v scripts --check
     - isort --check "cibo/" "demo/" "scripts/"
-    - pyright
+    - sudo pyright
