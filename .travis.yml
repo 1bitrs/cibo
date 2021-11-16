@@ -4,9 +4,8 @@ language: python
 python:
   - "3.7.5"
 
-# Handle git submodules
 git:
-  submodules: false
+  submodules: false  # Handle git submodules manually
 
 before_install:
   - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
@@ -14,40 +13,18 @@ before_install:
   - nvm install node
   - npm install -g pyright@1.1.86
 
-script: 
+before_script:
   - python -V
   - node -v
   - npm -v
   - pyright --version
 
-# os: linux
-# dist: xenial
-# language: python
-# python:
-#   - "3.7.5"
+script: 
+  - pip install -q  black==20.8b1
+  - pip install -q  isort==5.6.4
+  - black -v cibo --check
+  - black -v demo --check
+  - black -v scripts --check
+  - isort --check "cibo/" "demo/" "scripts/"
+  - pyright
 
-# # Handle git submodules
-# git:
-#     submodules: false
-# # Use sed to replace the SSH URL with the public URL, then initialize submodules
-# before_install:
-#     - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
-#     - git submodule update --init --recursive
-
-# before_script:
-#   - sudo apt update
-#   - sudo apt install npm
-#   - sudo npm install n -g
-#   - sudo n lts
-#   - sudo node -v
-#   - sudo npm install -g pyright@1.1.86
-#   - python -V
-
-# script: 
-#     - pip install -q  black==20.8b1
-#     - pip install -q  isort==5.6.4
-#     - black -v cibo --check
-#     - black -v demo --check
-#     - black -v scripts --check
-#     - isort --check "cibo/" "demo/" "scripts/"
-#     - sudo pyright
