@@ -43,7 +43,7 @@ setup(
     platforms="any",
     install_requires=[
         "Flask==1.1.1",
-        "pydantic==1.6.1",
+        "pydantic==1.6.2",
         "flasgger==0.9.3",
     ],
     classifiers=[
