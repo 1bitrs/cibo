@@ -6,15 +6,12 @@ python:
   - "3.7.5"
 
 before_script:
-  - sudo apt update
-  - sudo apt install npm
-  - sudo npm install n -g
-#   - sudo n lastest
-  - sudo n lts
-#   - curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
-#   - sudo apt-get install -y nodejs
-  - sudo node -v
-  - sudo npm install -g pyright@1.1.86
+  - apt update
+  - apt install npm
+  - npm install n -g
+  - n lts
+  - node -v
+  - npm install -g pyright@1.1.86
   - python -V
 
 # Handle git submodules yourself
@@ -32,4 +29,4 @@ script:
     - black -v demo --check
     - black -v scripts --check
     - isort --check "cibo/" "demo/" "scripts/"
-    - sudo pyright
+    - pyright
