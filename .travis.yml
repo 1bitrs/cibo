@@ -13,7 +13,7 @@ before_script:
   - sudo n lts
 #   - curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 #   - sudo apt-get install -y nodejs
-  - node -v
+  - sudo node -v
   - sudo npm install -g pyright@1.1.86
   - python -V
 
@@ -32,4 +32,4 @@ script:
     - black -v demo --check
     - black -v scripts --check
     - isort --check "cibo/" "demo/" "scripts/"
-    - pyright
+    - sudo pyright
