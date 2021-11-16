@@ -6,16 +6,19 @@ python:
 
 # Handle git submodules
 git:
-    submodules: false
+  submodules: false
 
 before_install:
-    - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
-    - git submodule update --init --recursive
-    - nvm install node 16.13.0
+  - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+  - git submodule update --init --recursive
+  - nvm install node
+  - npm npm install -g pyright@1.1.86
 
 script: 
-    - python -V
-    - node -v
+  - python -V
+  - node -v
+  - npm -v
+  - pyright --version
 
 # os: linux
 # dist: xenial
