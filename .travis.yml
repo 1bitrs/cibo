@@ -12,7 +12,7 @@ before_install:
   - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
   - git submodule update --init --recursive
   - nvm install node
-  - npm npm install -g pyright@1.1.86
+  - npm install -g pyright@1.1.86
 
 script: 
   - python -V
