@@ -5,13 +5,12 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 
-## Install
+## Installing
 ```shell
 python setup.py install
 ```
 
-## Usage
-### Basic
+## A Simple Example
 ```python
 from cibo import Handler, SimpleContext, Blueprint, BaseApiQuery, BaseApiBody
 
@@ -38,7 +37,7 @@ class EchoHandler(Handler):
         )
 
 ```
-### Advance
+Use a custom model and validate function
 ```python
 @api.post("/user")
 class UserHandler(Handler):
