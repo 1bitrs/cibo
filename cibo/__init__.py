@@ -6,7 +6,6 @@ from .args import BaseApiBody, BaseApiQuery
 from .blueprint import Blueprint
 from .context import Context, ErrorContext, SimpleContext
 from .handler import Handler
-from .types import *
 
 __all__ = [
     "Handler",

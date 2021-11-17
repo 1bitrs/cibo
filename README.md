@@ -1,9 +1,10 @@
 ## Cibo
 ![Python Version](https://img.shields.io/badge/python-v3.7.5-brightgreen)
 ![System Platform](https://img.shields.io/badge/platform-ubuntu-brightgreen.svg)
-![CI](https://app.travis-ci.com/yangfan9702/cibo.svg?branch=master&status=unknown)
+![Travis CI](https://app.travis-ci.com/yangfan9702/cibo.svg?branch=master&status=unknown)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-
+![Repo Size](https://img.shields.io/github/repo-size/yangfan9702/cibo)
+![License](https://img.shields.io/github/license/yangfan9702/cibo)
 
 ## Installing
 ```shell
