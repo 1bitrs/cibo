@@ -28,6 +28,8 @@
       "build": false,
       "dist": false,
       "*.egg-info": false,
+      ".pytest_cache": true,
+      ".github": true
     },
     "files.watcherExclude": {
       "**/.git": true,

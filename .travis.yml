@@ -18,13 +18,13 @@ before_install:
   - pyright --version
 
 before_script:
-  - pip install -q  black==20.8b1
-  - pip install -q  isort==5.6.4
+  - pip install -r requirements-dev.txt
 
 script: 
   - black -v cibo --check
   - black -v demo --check
+  - black -v tests --check
   - black -v scripts --check
-  - isort --check "cibo/" "demo/" "scripts/"
+  - isort --check "cibo/" "demo/" "tests/" "scripts/"
   - pyright
 

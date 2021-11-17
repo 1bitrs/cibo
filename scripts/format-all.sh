@@ -15,7 +15,8 @@ echo -e "${Y}Runnning black...${N}"
 black -v $ROOT/cibo
 black -v $ROOT/scripts
 black -v $ROOT/demo
+black -v $ROOT/tests
 
 
 echo -e "${Y}Runnning isort...${N}"
-isort "$ROOT/cibo/" "$ROOT/scripts/" "$ROOT/demo/"
+isort "$ROOT/cibo/" "$ROOT/scripts/" "$ROOT/demo/" "$ROOT/tests/"
