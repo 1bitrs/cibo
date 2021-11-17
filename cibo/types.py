@@ -1,7 +1,9 @@
-from typing import Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 
-from flask import Response
+if TYPE_CHECKING:
+
+    from flask.wrappers import Response
 
 TCorsConfig = Dict[str, Union[str, List[str]]]
 
-TFlaskResponse = Union[Tuple[Response, int], Response]
+TFlaskResponse = Union[Tuple["Response", int], "Response"]

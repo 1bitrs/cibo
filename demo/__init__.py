@@ -1,8 +1,8 @@
-from flask import Flask
+from cibo import Flask
 
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, enable_doc=True, docs_path="")
     from .handlers import api
 
     app.register_blueprint(api, url_prefix="/api")
@@ -18,7 +18,7 @@ def create_app():
         "schemes": ["http"],
     }
 
-    from flasgger import Swagger
+    # from flasgger import Swagger
 
-    Swagger(app)
+    # Swagger(app)
     return app
