@@ -44,7 +44,7 @@ setup(
     install_requires=[
         "Flask==1.1.1",
         "pydantic==1.6.2",
-        "flasgger==0.9.3",
+        "apispec==5.0.0",
     ],
     classifiers=[
         "Intended Audience :: Developers",

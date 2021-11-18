@@ -85,32 +85,31 @@ from math import log10
 from typing import Any, Iterable, Union
 from uuid import UUID
 
-from flasgger import LazyJSONEncoder
-from flask.json import dumps
+from flask.json import JSONEncoder, dumps
 from pydantic import BaseModel
 
 
-class JSONEncoder(LazyJSONEncoder):
-    def default(self, obj: Any) -> Union[str, list, dict, Any]:
-        if isinstance(obj, UUID):
-            return str(obj)
-        elif isinstance(obj, datetime):
-            return obj.strftime("%Y-%m-%d %H:%M:%S")
-        elif isinstance(obj, int) and log10(obj) > 11:
-            return str(obj)
-        elif isinstance(obj, Decimal):
-            return float(obj)
-        elif is_dataclass(obj):
-            return asdict(obj)
-        elif hasattr(obj, "to_dict_v2"):
-            return obj.to_dict_v2()  # type: ignore
-        elif hasattr(obj, "to_dict"):
-            return obj.to_dict()  # type: ignore
-        elif isinstance(obj, BaseModel):
-            return obj.dict()
-        elif isinstance(obj, Iterable):  # Document是Iterable对象
-            return list(obj)
-        return super().default(obj)
+class JSONEncoder(JSONEncoder):
+    def default(self, o: Any) -> Union[str, list, dict, Any]:
+        if isinstance(o, UUID):
+            return str(o)
+        elif isinstance(o, datetime):
+            return o.strftime("%Y-%m-%d %H:%M:%S")
+        elif isinstance(o, int) and log10(o) > 11:
+            return str(o)
+        elif isinstance(o, Decimal):
+            return float(o)
+        elif is_dataclass(o):
+            return asdict(o)
+        elif hasattr(o, "to_dict_v2"):
+            return o.to_dict_v2()  # type: ignore
+        elif hasattr(o, "to_dict"):
+            return o.to_dict()  # type: ignore
+        elif isinstance(o, BaseModel):
+            return o.dict()
+        elif isinstance(o, Iterable):  # Document是Iterable对象
+            return list(o)
+        return super().default(o)
 
 
 def jsonify_with_encoder(*args, **kwargs):

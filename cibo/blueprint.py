@@ -16,8 +16,38 @@ class ApiAuthInfo:
 
 
 class Blueprint(_Blueprint):
+    def __init__(
+        self,
+        name,
+        import_name,
+        static_folder=None,
+        static_url_path=None,
+        template_folder=None,
+        url_prefix=None,
+        subdomain=None,
+        url_defaults=None,
+        root_path=None,
+        cli_group=None,
+        openapi_tag: str = None,
+    ):
+        super().__init__(
+            name,
+            import_name,
+            static_folder,
+            static_url_path,
+            template_folder,
+            url_prefix,
+            subdomain,
+            url_defaults,
+            root_path,
+            cli_group,
+        )
+
+        self.openapi_tag = openapi_tag or name
+        self.parameters = []
+
     @staticmethod
-    def _parser_doc(_cls):
+    def _parser_doc(_cls: Type[Handler]):
         """
         需要解析授权类型
         需要解析文档字符串里面的 @returns
@@ -32,21 +62,12 @@ class Blueprint(_Blueprint):
             _cls.parameters.append(Body.get_swag_body_param())
         if Resp:
             _cls.responses["200"] = Resp.get_swag_resp_schema()
-        _cls.security.append(ApiAuthInfo(auth_type="normal", optional=True))
+        # _cls.security.append(ApiAuthInfo(auth_type="normal", optional=True))
 
     def register_view(self, rule: str, method: str, endpoint: str = None):
         def decorator(cls: Type[Handler]):
             if not issubclass(cls, Handler):
                 raise ValueError(f"class {cls} must be extended from class Handler")
-
-            # 初始化 Swagger 参数, 使用可变对象做默认值在这里会有问题
-            cls.tags = [rule.strip("/").split("/", 1)[0].title() + ":"]
-            cls.parameters = []
-            cls.responses = {}
-            cls.deprecated = []
-            cls.definitions = []
-            cls.security = []
-            cls.externalDocs = {}
 
             methods = {method.upper()}
             if cls.cors_config is not None:
@@ -84,14 +105,17 @@ class Blueprint(_Blueprint):
 
         return cls
 
-    def post(self, rule: str, endpoint: str = None):
-        return self.register_view(rule, method="post", endpoint=endpoint)
-
     def get(self, rule: str, endpoint: str = None):
         return self.register_view(rule, method="get", endpoint=endpoint)
 
+    def post(self, rule: str, endpoint: str = None):
+        return self.register_view(rule, method="post", endpoint=endpoint)
+
     def put(self, rule: str, endpoint: str = None):
         return self.register_view(rule, method="put", endpoint=endpoint)
+
+    def patch(self, rule: str, endpoint: str = None):
+        return self.register_view(rule, method="patch", endpoint=endpoint)
 
     def delete(self, rule: str, endpoint: str = None):
         return self.register_view(rule, method="delete", endpoint=endpoint)

@@ -1,6 +1,6 @@
-from typing import Callable, List, Optional, Set, Type
+from typing import Callable, Dict, List, Optional, Set, Type
 
-from flasgger import SwaggerView
+from flask.views import MethodView
 from pydantic import BaseModel
 from typing_extensions import Literal
 
@@ -8,7 +8,7 @@ from .context import Context
 from .types import TCorsConfig
 
 
-class Handler(SwaggerView):
+class Handler(MethodView):
 
     methods: Set[Literal["GET", "POST", "PUT", "DELETE"]]
     handle_func_name = "handle"
@@ -19,6 +19,9 @@ class Handler(SwaggerView):
 
     Query: Optional[BaseModel] = None
     Body: Optional[BaseModel] = None
+
+    parameters: List[Dict] = list()
+    responses: Dict = dict()
 
     @classmethod
     def as_view(cls, name: str = None, *args, **kwargs):
