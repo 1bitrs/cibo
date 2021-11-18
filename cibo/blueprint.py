@@ -5,7 +5,7 @@ from flask.blueprints import Blueprint as _Blueprint
 from typing_extensions import Literal
 
 from .args import BaseApiBody, BaseApiQuery, BaseApiSuccessResp
-from .deorators import inject_args_decorator, inject_context_decorator
+from .decorators import inject_args_decorator, inject_context_decorator
 from .handler import Handler
 
 
@@ -56,6 +56,8 @@ class Blueprint(_Blueprint):
         Body = getattr(_cls, "Body", None)  # type: Optional[Type[BaseApiBody]]
         Query = getattr(_cls, "Query", None)  # type: Optional[Type[BaseApiQuery]]
         Resp = getattr(_cls, "Resp", None)  # type: Optional[Type[BaseApiSuccessResp]]
+        setattr(_cls, "parameters", list())
+        setattr(_cls, "responses", dict())
         if Query:
             _cls.parameters.extend(Query.get_swag_query_param())
         if Body:

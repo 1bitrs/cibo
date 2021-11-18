@@ -20,15 +20,13 @@ class Handler(MethodView):
     Query: Optional[BaseModel] = None
     Body: Optional[BaseModel] = None
 
-    parameters: List[Dict] = list()
-    responses: Dict = dict()
+    parameters: List[Dict]
+    responses: Dict
 
     @classmethod
     def as_view(cls, name: str = None, *args, **kwargs):
         if not hasattr(cls, cls.handle_func_name):
-            raise ValueError(f"class {cls} does not have {cls.handle_func_name} method")
+            raise ValueError(f"class `{cls}` does not have {cls.handle_func_name} method")
 
-        if not name:
-            name = cls.__name__
-
+        name = name or cls.__name__
         return super().as_view(name, *args, **kwargs)
