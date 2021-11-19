@@ -234,7 +234,7 @@ class Flask(_Flask):
                 for method in class_.methods:
                     paths[rule.rule] = {
                         method.lower(): {
-                            "tag": ["api"],
+                            "tags": ["api"],
                             "summary": func.__doc__,
                             "parameters": class_.parameters,
                             "responses": class_.responses,
