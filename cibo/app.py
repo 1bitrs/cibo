@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from apispec import APISpec
 from flask import Blueprint
@@ -191,6 +191,7 @@ class Flask(_Flask):
             info=self._make_info(),
             tags=self._make_tags(),
             paths=self._make_paths(),
+            components=self._make_components(),
             **kwargs,
         )
 
@@ -241,6 +242,25 @@ class Flask(_Flask):
                         }
                     }
         return paths
+
+    def _make_components(self) -> dict:
+        components = {}
+        components["schemas"] = {}
+        for rule in self.url_map.iter_rules():
+            view_func = self.view_functions[rule.endpoint]
+            if hasattr(view_func, "view_class") and issubclass(view_func.view_class, Handler):
+                class_ = view_func.view_class
+                if TYPE_CHECKING:
+                    from .args import BaseApiSuccessResp
+                resp = getattr(class_, "Resp", None)  # type:BaseApiSuccessResp
+                if resp:
+                    _schema = resp.schema()
+                    if _schema["type"] == "object":
+                        definitions = _schema.get("definitions", {})
+                        properties = _schema.get("properties", {})
+
+                        components["schemas"][resp.__name__] = {"type": "object", "description": resp.__doc__ or "Response", "properties": properties}  # type: ignore
+        return components
 
 
 def get_tag(blueprint, blueprint_name: str) -> Dict[str, Any]:

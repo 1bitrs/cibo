@@ -68,8 +68,20 @@ class BaseApiSuccessResp(BaseApiArgs):
     status_msg = "ok"
 
     @classmethod
+    def translate_schema_to_openapi(cls) -> Dict:
+        return {
+            "description": cls.__doc__ or "Response",
+            "headers": getattr(cls, "_headers", {}),
+            "links": getattr(cls, "_links", {}),
+            "content": {
+                "application/json": {"schema": {"$ref": f"#/components/schemas/{cls.__name__}"}}
+            },
+        }
+
+    @classmethod
     def get_swag_resp_schema(cls) -> Dict:
-        return schema_to_swagger(cls.schema())
+        # return schema_to_swagger(cls.schema())
+        return cls.translate_schema_to_openapi()
 
 
 class BaseApiBody(BaseApiArgs):

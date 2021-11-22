@@ -48,11 +48,6 @@ class Blueprint(_Blueprint):
 
     @staticmethod
     def _parser_doc(_cls: Type[Handler]):
-        """
-        需要解析授权类型
-        需要解析文档字符串里面的 @returns
-        需要解析 `Body` `Query`
-        """
         Body = getattr(_cls, "Body", None)  # type: Optional[Type[BaseApiBody]]
         Query = getattr(_cls, "Query", None)  # type: Optional[Type[BaseApiQuery]]
         Resp = getattr(_cls, "Resp", None)  # type: Optional[Type[BaseApiSuccessResp]]

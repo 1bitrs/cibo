@@ -33,10 +33,12 @@ class UserHandler(Handler):
         inviter: str
         invitees: List[str]
 
-    class Resp(BaseApiSuccessResp):
-        user: User
-        inviter: str
-        invitees: List[str]
+    # class Resp(BaseApiSuccessResp):
+    #     """用户信息"""
+
+    #     # user: User = Field(description="用户信息")
+    #     inviter: str
+    #     invitees: List[str] = Field(description="邀请到的用户")
 
     def handle(self, context: SimpleContext, body: Body):
         """handle user"""

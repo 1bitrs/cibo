@@ -19,7 +19,7 @@ REDOC_TEMPLATE = """
   <body>
     <div id="redoc"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/redoc@latest/bundles/redoc.standalone.js"> </script> // 
+    <script src="https://cdn.jsdelivr.net/npm/redoc@2.0.0-rc.57/bundles/redoc.standalone.js"> </script>
     <script>
       Redoc.init(
         "{{ url_for('_openapi.spec') }}",
@@ -38,7 +38,7 @@ DOCS_TEMPLATE = """
 <head>
   <meta charset="UTF-8">
   <title>Swagger UI</title>
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@3/swagger-ui.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@4.1.0/swagger-ui.css">
   <link rel="icon" type="image/png" href="https://apiflask.com/_assets/favicon.png">
   <style>
     html {
@@ -59,8 +59,8 @@ DOCS_TEMPLATE = """
 </head>
 <body>
   <div id="swagger-ui"></div>
-  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@3/swagger-ui-bundle.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@3/swagger-ui-standalone-preset.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@4.1.0/swagger-ui-bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@4.1.0/swagger-ui-standalone-preset.js"></script>
   <script>
     var baseConfig = {
       url: "{{ url_for('_openapi.spec') }}",
