@@ -301,9 +301,9 @@ class Flask(_Flask):
                 "content": {v._content_type: {"schema": translate_schema_to_openapi(v.schema())}},
             }
 
-        for k, v in components_schemas.items():
-            components["schemas"][k] = translate_schema_to_openapi(v.schema())
-
+        # for k, v in components_schemas.items():
+            # components["schemas"][k] = translate_schema_to_openapi(v.schema())
+        components["schemas"] = components_schemas
         return components
 
         # for rule in self.url_map.iter_rules():

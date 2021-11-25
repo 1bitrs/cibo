@@ -207,4 +207,17 @@ components_schemas = dict()  # type: Dict[str, Type[BaseModel]]
 
 
 def translate_schema_to_openapi(schema: Dict) -> Dict:
+    properties = schema.get("properties", {})
+    definitions = schema.get("definitions", {})
+    for k, v in properties.items():
+        if "allOf" in v:
+            for all_of in v["allOf"]:
+                if "$ref" in all_of:
+                    _name = all_of['$ref'].split('/')[-1]
+                    all_of["$ref"] = f"#/components/schemas/{_name}"
+                    components_schemas[_name] = definitions.pop(_name) or {}  # type: ignore
+        if "$ref" in v:
+            _name = v['$ref'].split('/')[-1]
+            v['$ref'] = f"#/components/schemas/{_name}"
+        
     return schema
