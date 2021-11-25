@@ -1,10 +1,22 @@
 import json
 import re
 from ast import literal_eval
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, Optional, Type
 
 from pydantic import BaseModel
 from werkzeug.datastructures import ImmutableMultiDict
+
+from .types import MediaType
+
+# schemas: Dict[str, Any] = dict()
+# responses: Dict[str, Any] = dict()
+# parameters: Dict[str, Any] = dict()
+# request_bodies: Dict[str,  Any] = dict()
+# security_schemes: Dict[str,  Any] = dict()
+
+
+class BaseApiArgs(BaseModel):
+    ...
 
 
 def get_property(key: str, definitions: dict):
@@ -58,14 +70,14 @@ def schema_to_swagger(schema: dict) -> dict:
     return schema
 
 
-class BaseApiArgs(BaseModel):
-    ...
-
-
 class BaseApiSuccessResp(BaseApiArgs):
     success = True
     status_code = 200
     status_msg = "ok"
+    _headers: Dict[str, Any]
+    _links: Dict[str, Any]
+    _schema_alias: str
+    _content_type: MediaType = "application/json"
 
     @classmethod
     def translate_schema_to_openapi(cls) -> Dict:
@@ -74,17 +86,22 @@ class BaseApiSuccessResp(BaseApiArgs):
             "headers": getattr(cls, "_headers", {}),
             "links": getattr(cls, "_links", {}),
             "content": {
-                "application/json": {"schema": {"$ref": f"#/components/schemas/{cls.__name__}"}}
+                "application/json": {
+                    "schema": {"$ref": f"#/components/schemas/{cls._schema_alias}"}
+                }
             },
         }
 
     @classmethod
-    def get_swag_resp_schema(cls) -> Dict:
-        # return schema_to_swagger(cls.schema())
-        return cls.translate_schema_to_openapi()
+    def get_openapi_response_body(cls) -> Dict:
+        components_responses[cls._schema_alias] = cls
+        return {"$ref": f"#/components/responses/{cls._schema_alias}"}
 
 
 class BaseApiBody(BaseApiArgs):
+    _schema_alias: str
+    _content_type: MediaType = "application/json"
+
     @classmethod
     def parse_form_args(cls, form: ImmutableMultiDict) -> "BaseApiBody":
         obj_dict = dict(form)
@@ -100,16 +117,31 @@ class BaseApiBody(BaseApiArgs):
 
         return cls.parse_obj(obj_dict)
 
+    # @classmethod
+    # def get_swag_body_param(cls):
+    #     _swagger = schema_to_swagger(cls.schema())
+    #     return {
+    #         "in": "body",
+    #         "name": "body",
+    #         "required": True,
+    #         "description": "请求 Body",
+    #         "schema": _swagger,
+    #     }
     @classmethod
-    def get_swag_body_param(cls):
-        _swagger = schema_to_swagger(cls.schema())
+    def translate_schema_to_openapi(cls):
+        _schema = cls.schema()
         return {
-            "in": "body",
-            "name": "body",
-            "required": True,
-            "description": "请求 Body",
-            "schema": _swagger,
+            "schema": {
+                "type": _schema["type"],
+                "required": _schema.get("required", []),
+                "properties": _schema.get("properties", {}),
+            }
         }
+
+    @classmethod
+    def get_openapi_request_body(cls):
+        components_request_bodies[cls._schema_alias] = cls
+        return {"$ref": f"#/components/requestBodies/{cls._schema_alias}"}
 
 
 class BaseApiQuery(BaseApiArgs):
@@ -132,17 +164,47 @@ class BaseApiQuery(BaseApiArgs):
                         obj_dict[_name] = json.loads(_value)
         return cls.parse_obj(obj_dict)
 
+    _schema_alias: str
+    # @classmethod
+    # def get_swag_query_param(cls) -> List[Dict[str, Union[str, bool]]]:
+    #     _schema = schema_to_swagger(cls.schema())
+    #     properties = _schema.get("properties", {})
+    #     required = _schema.get("required", [])
+    #     params = []
+    #     for k, v in properties.items():
+    #         item = {"in": "query", "name": k}
+    #         for _k, _v in v.items():
+    #             if _k in ["default", "type", "description", "enum"]:
+    #                 item[_k] = _v
+    #         item["required"] = k in required
+    #         params.append(item)
+    #     return params
     @classmethod
-    def get_swag_query_param(cls) -> List[Dict[str, Union[str, bool]]]:
-        _schema = schema_to_swagger(cls.schema())
-        properties = _schema.get("properties", {})
-        required = _schema.get("required", [])
-        params = []
-        for k, v in properties.items():
-            item = {"in": "query", "name": k}
-            for _k, _v in v.items():
-                if _k in ["default", "type", "description", "enum"]:
-                    item[_k] = _v
-            item["required"] = k in required
-            params.append(item)
-        return params
+    def get_openapi_parameters(cls):
+        components_parameters[cls._schema_alias] = cls
+        return [
+            {"$ref": f"#/components/parameters/{cls._schema_alias}"},
+        ]
+
+    @classmethod
+    def translate_schema_to_openapi(cls):
+        _schema = cls.schema()
+        return {
+            "name": cls.__name__,
+            "in": "query",
+            "description": cls.__doc__ or "请求 Query",
+            "required": True,
+            "deprecated": False,
+            "allowEmptyValue": False,
+            "schema": _schema,
+        }
+
+
+components_parameters = dict()  # type: Dict[str, Type[BaseApiQuery]]
+components_request_bodies = dict()  # type: Dict[str, Type[BaseApiBody]]
+components_responses = dict()  # type: Dict[str, Type[BaseApiSuccessResp]]
+components_schemas = dict()  # type: Dict[str, Type[BaseModel]]
+
+
+def translate_schema_to_openapi(schema: Dict) -> Dict:
+    return schema

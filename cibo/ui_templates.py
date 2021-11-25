@@ -7,7 +7,7 @@ REDOC_TEMPLATE = """
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
-    <link rel="icon" type="image/png" href="https://apiflask.com/_assets/favicon.png">
+    <link rel="icon" type="image/png" href="#">
     <style>
       body {
         margin: 0;
@@ -39,7 +39,7 @@ DOCS_TEMPLATE = """
   <meta charset="UTF-8">
   <title>Swagger UI</title>
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@4.1.0/swagger-ui.css">
-  <link rel="icon" type="image/png" href="https://apiflask.com/_assets/favicon.png">
+  <link rel="icon" type="image/png" href="#">
   <style>
     html {
       box-sizing: border-box;

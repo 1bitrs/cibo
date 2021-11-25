@@ -5,7 +5,7 @@ from cibo import Blueprint, ErrorContext
 
 from ..exceptions import AuthException
 
-api = Blueprint("api", __name__)
+api = Blueprint("api", __name__, openapi_tag="API", tag_description="description of API")
 
 
 @api.errorhandler(ValidationError)

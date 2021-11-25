@@ -14,12 +14,12 @@ class EchoHandler(Handler):
     decorators = [token_auth]
 
     class Query(BaseApiQuery):
-        a: str
-        b: Optional[List[int]]
-        c: Optional[Dict[str, int]]
+        a: str = Field(description="description of parameter a")
+        b: Optional[List[int]] = Field(description="description of parameter b")
+        c: Optional[Dict[str, int]] = Field(description="description of parameter a")
 
     class Body(BaseApiBody):
-        d: Set[int]
+        d: Set[int] = Field(description="description of parameter d")
         e: Tuple[Dict[int, List], Dict[int, List]]
 
     class Resp(BaseApiSuccessResp):

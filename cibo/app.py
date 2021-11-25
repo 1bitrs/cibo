@@ -1,18 +1,20 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Type, Union, cast
 
 from apispec import APISpec
-from flask import Blueprint
 from flask import Flask as _Flask
 from flask import render_template_string
 
 from cibo.handler import Handler
 
+from .blueprint import Blueprint
+from .openapi import get_tag
 from .ui_templates import DOCS_TEMPLATE, OAUTH2_REDIRECT_TEMPLATE, REDOC_TEMPLATE
 
 
 class Flask(_Flask):
     openapi_version: str
     tags: List
+    _spec: Union[str, dict] = ""
 
     def __init__(
         self,
@@ -140,7 +142,7 @@ class Flask(_Flask):
 
             @bp.route(self.spec_path)
             def spec():  # type: ignore
-                return self._get_spec(force_update=True)
+                return self._get_spec(force_update=False)
 
         if self.docs_path:
             """Swagger"""
@@ -168,6 +170,13 @@ class Flask(_Flask):
             self.register_blueprint(bp)
 
     def _get_spec(self, spec_format: str = "json", force_update=False) -> Union[dict, str]:
+        # a = {}
+        # with open("./cibo/demo.json") as f:
+        #     import json
+
+        #     a = json.loads(f.read())
+        # return a
+
         if not force_update and self._spec:
             return self._spec
 
@@ -226,48 +235,100 @@ class Flask(_Flask):
         for rule in self.url_map.iter_rules():
             view_func = self.view_functions[rule.endpoint]
             if hasattr(view_func, "view_class") and issubclass(view_func.view_class, Handler):
-                class_ = view_func.view_class
+                class_ = cast(Type[Handler], view_func.view_class)
                 func = getattr(class_, class_.handle_func_name)
                 if not func:
                     raise AttributeError(
                         f"{class_.__name__} must have function {class_.handle_func_name}"
                     )
+                blueprint = self.blueprints[rule.endpoint.split(".")[0]]  # type: Blueprint
                 for method in class_.methods:
                     paths[rule.rule] = {
                         method.lower(): {
-                            "tags": ["api"],
+                            "tags": [blueprint.openapi_tag],
                             "summary": func.__doc__,
                             "parameters": class_.parameters,
+                            "requestBody": class_.request_body,
                             "responses": class_.responses,
                         }
                     }
         return paths
 
     def _make_components(self) -> dict:
-        components = {}
-        components["schemas"] = {}
-        for rule in self.url_map.iter_rules():
-            view_func = self.view_functions[rule.endpoint]
-            if hasattr(view_func, "view_class") and issubclass(view_func.view_class, Handler):
-                class_ = view_func.view_class
-                if TYPE_CHECKING:
-                    from .args import BaseApiSuccessResp
-                resp = getattr(class_, "Resp", None)  # type:BaseApiSuccessResp
-                if resp:
-                    _schema = resp.schema()
-                    if _schema["type"] == "object":
-                        definitions = _schema.get("definitions", {})
-                        properties = _schema.get("properties", {})
+        components = {
+            "schemas": {},
+            "responses": {},
+            "parameters": {},
+            "examples": {},
+            "requestBodies": {},
+            "headers": {},
+            "securitySchemes": {},
+            "links": {},
+            "callback": {},
+        }
+        from .args import (
+            components_parameters,
+            components_request_bodies,
+            components_responses,
+            components_schemas,
+            translate_schema_to_openapi,
+        )
 
-                        components["schemas"][resp.__name__] = {"type": "object", "description": resp.__doc__ or "Response", "properties": properties}  # type: ignore
+        for k, v in components_parameters.items():
+            components["parameters"][k] = {
+                "name": k,
+                "in": "query",
+                "description": "",
+                "required": True,
+                "deprecated": False,
+                "allowEmptyValue": False,
+                "schema": translate_schema_to_openapi(v.schema()),
+            }
+
+        for k, v in components_request_bodies.items():
+            components["requestBodies"][k] = {
+                "description": "",
+                "content": {v._content_type: {"schema": translate_schema_to_openapi(v.schema())}},
+                "required": True,
+            }
+
+            translate_schema_to_openapi(v.schema())
+
+        for k, v in components_responses.items():
+            v
+            components["responses"][k] = {
+                "description": "",
+                "content": {v._content_type: {"schema": translate_schema_to_openapi(v.schema())}},
+            }
+
+        for k, v in components_schemas.items():
+            components["schemas"][k] = translate_schema_to_openapi(v.schema())
+
         return components
 
-
-def get_tag(blueprint, blueprint_name: str) -> Dict[str, Any]:
-    """Get tag from blueprint object."""
-    tag: Dict[str, Any]
-    if isinstance(blueprint.openapi_tag, dict):
-        tag = blueprint.openapi_tag
-    else:
-        tag = {"name": blueprint.openapi_tag}
-    return tag
+        # for rule in self.url_map.iter_rules():
+        #     view_func = self.view_functions[rule.endpoint]
+        #     if hasattr(view_func, "view_class") and issubclass(view_func.view_class, Handler):
+        #         class_ = view_func.view_class
+        #         resp = getattr(class_, "Resp", None)  # type:BaseApiSuccessResp
+        #         if resp:
+        #             _schema = resp.schema()
+        #             if _schema["type"] == "object":
+        #                 properties = _schema.get("properties", {})
+        #                 components["schemas"][resp._schema_alias] = {
+        #                     "type": "object",
+        #                     "description": resp.__doc__ or "Response",
+        #                     "properties": properties,
+        #                 }
+        #                 definitions = _schema.get("definitions", {})
+        #                 for _property, _value in properties.items():
+        #                     if "allOf" in _value:
+        #                         _definition = definitions.get(_value["title"])
+        #                         components["schemas"][f"{resp._schema_alias}${_value['title']}"] = {
+        #                             "type": _definition["type"],
+        #                             "description": _value["description"],
+        #                             "properties": _definition["properties"],
+        #                         }
+        #                         del _value["allOf"]
+        #                         _value["type"] = "object"
+        # return components

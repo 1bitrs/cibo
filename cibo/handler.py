@@ -21,6 +21,7 @@ class Handler(MethodView):
     Body: Optional[BaseModel] = None
 
     parameters: List[Dict]
+    request_body: Dict
     responses: Dict
 
     @classmethod

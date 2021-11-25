@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, Type
+from typing import Optional, Type, Union
 
 from flask.blueprints import Blueprint as _Blueprint
 from typing_extensions import Literal
@@ -28,7 +28,9 @@ class Blueprint(_Blueprint):
         url_defaults=None,
         root_path=None,
         cli_group=None,
-        openapi_tag: str = None,
+        openapi_tag: Union[dict, str] = None,
+        enable_openapi: bool = True,
+        tag_description: str = None,
     ):
         super().__init__(
             name,
@@ -44,22 +46,27 @@ class Blueprint(_Blueprint):
         )
 
         self.openapi_tag = openapi_tag or name
-        self.parameters = []
+        self.enable_openapi = enable_openapi
+        self.tag_description = tag_description
 
     @staticmethod
-    def _parser_doc(_cls: Type[Handler]):
+    def _parse_parameters_and_responses(_cls: Type[Handler]):
         Body = getattr(_cls, "Body", None)  # type: Optional[Type[BaseApiBody]]
         Query = getattr(_cls, "Query", None)  # type: Optional[Type[BaseApiQuery]]
         Resp = getattr(_cls, "Resp", None)  # type: Optional[Type[BaseApiSuccessResp]]
-        setattr(_cls, "parameters", list())
+
         setattr(_cls, "responses", dict())
+        setattr(_cls, "parameters", list())
+        setattr(_cls, "request_body", dict())
         if Query:
-            _cls.parameters.extend(Query.get_swag_query_param())
+            setattr(Query, "_schema_alias", f"{_cls.__name__}${Query.__name__}")
+            _cls.parameters.extend(Query.get_openapi_parameters())
         if Body:
-            _cls.parameters.append(Body.get_swag_body_param())
+            setattr(Body, "_schema_alias", f"{_cls.__name__}${Body.__name__}")
+            _cls.request_body = Body.get_openapi_request_body()
         if Resp:
-            _cls.responses["200"] = Resp.get_swag_resp_schema()
-        # _cls.security.append(ApiAuthInfo(auth_type="normal", optional=True))
+            setattr(Resp, "_schema_alias", f"{_cls.__name__}${Resp.__name__}")
+            _cls.responses["200"] = Resp.get_openapi_response_body()
 
     def register_view(self, rule: str, method: str, endpoint: str = None):
         def decorator(cls: Type[Handler]):
@@ -81,7 +88,7 @@ class Blueprint(_Blueprint):
 
     def _handle_view_cls_handle_func(self, cls: Type[Handler]):
         """注册装饰器"""
-        self._parser_doc(cls)
+        self._parse_parameters_and_responses(cls)
         decorators = []
 
         decorators.extend(
