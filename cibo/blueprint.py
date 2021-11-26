@@ -1,18 +1,10 @@
-from dataclasses import dataclass
 from typing import Optional, Type, Union
 
 from flask.blueprints import Blueprint as _Blueprint
-from typing_extensions import Literal
 
 from .args import BaseApiBody, BaseApiQuery, BaseApiSuccessResp
 from .decorators import inject_args_decorator, inject_context_decorator
 from .handler import Handler
-
-
-@dataclass
-class ApiAuthInfo:
-    auth_type: Literal["normal", "corp"]
-    optional: bool
 
 
 class Blueprint(_Blueprint):
@@ -51,8 +43,8 @@ class Blueprint(_Blueprint):
 
     @staticmethod
     def _parse_parameters_and_responses(_cls: Type[Handler]):
-        Body = getattr(_cls, "Body", None)  # type: Optional[Type[BaseApiBody]]
         Query = getattr(_cls, "Query", None)  # type: Optional[Type[BaseApiQuery]]
+        Body = getattr(_cls, "Body", None)  # type: Optional[Type[BaseApiBody]]
         Resp = getattr(_cls, "Resp", None)  # type: Optional[Type[BaseApiSuccessResp]]
 
         setattr(_cls, "responses", dict())
@@ -66,7 +58,7 @@ class Blueprint(_Blueprint):
             _cls.request_body = Body.get_openapi_request_body()
         if Resp:
             setattr(Resp, "_schema_alias", f"{_cls.__name__}${Resp.__name__}")
-            _cls.responses["200"] = Resp.get_openapi_response_body()
+            _cls.responses["200"] = Resp.get_openapi_response()
 
     def register_view(self, rule: str, method: str, endpoint: str = None):
         def decorator(cls: Type[Handler]):

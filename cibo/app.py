@@ -7,7 +7,6 @@ from flask import render_template_string
 from cibo.handler import Handler
 
 from .blueprint import Blueprint
-from .openapi import get_tag
 from .ui_templates import DOCS_TEMPLATE, OAUTH2_REDIRECT_TEMPLATE, REDOC_TEMPLATE
 
 
@@ -70,62 +69,14 @@ class Flask(_Flask):
         self.enable_doc = enable_doc
         self.openapi_url_prefix = openapi_url_prefix
         self.openapi = openapi
-        """Info Object 
-        https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.2.md#infoObject
-        {
-            "title": "Sample Pet Store App",
-            "description": "This is a sample server for a pet store.",
-            "termsOfService": "http://example.com/terms/",
-            "contact": {
-                "name": "API Support",
-                "url": "http://www.example.com/support",
-                "email": "support@example.com"
-            },
-            "license": {
-                "name": "Apache 2.0",
-                "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
-            },
-            "version": "1.0.1"
-        }
-        """
         self.title = title
         self.description = description
         self.terms_of_service = terms_of_service
         self.contact = contact
         self.license = license
         self.version = version
-
-        """Servers
-        https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.2.md#serverObject
-        "servers": [
-            {
-                "url": "https://{username}.gigantic-server.com:{port}/{basePath}",
-                "description": "The production API server",
-                "variables": {
-                    "username": {
-                        "default": "demo",
-                        "description": "this value is assigned by the service provider, in this example `gigantic-server.com`"
-                    },
-                    "port": {
-                        "enum": [
-                            "8443",
-                            "443"
-                        ],
-                            "default": "8443"
-                        },
-                        "basePath": {
-                            "default": "v2"
-                        }
-                    }
-                }
-            }
-        ]
-        """
         self.servers = servers
 
-        """
-        https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.2.md#externalDocumentationObject
-        """
         self.external_docs = external_docs
 
         self.docs_path = docs_path
@@ -203,13 +154,22 @@ class Flask(_Flask):
             components=self._make_components(),
             **kwargs,
         )
+        from .args import _destory
+
+        _destory()
 
         return spec
 
     def _make_info(self) -> dict:
         """Make OpenAPI info object."""
-        info: dict
-        info = {}
+        info = {
+            "title": "",
+            "description": "",
+            "termsOfService": "",
+            "contact": {},
+            "license": {},
+            "version": "",
+        }
         if self.contact:
             info["contact"] = self.contact
         if self.license:
@@ -226,12 +186,33 @@ class Flask(_Flask):
         for blueprint_name, blueprint in self.blueprints.items():
             if blueprint_name == "_openapi":
                 continue
-            tag: Dict[str, Any] = get_tag(blueprint, blueprint_name)
+            _tag = getattr(blueprint, "openapi_tag", None)  # type: Union[dict, str]
+            if _tag:
+                if isinstance(_tag, dict):
+                    tag = _tag
+                else:
+                    tag = {
+                        "name": _tag,
+                        "description": blueprint.tag_description,
+                        "externalDocs": {},
+                    }
+            else:
+                tag = {
+                    "name": blueprint_name,
+                    "description": blueprint.tag_description,
+                    "externalDocs": {},
+                }
             tags.append(tag)
         return tags
 
     def _make_paths(self) -> dict:
-        paths = {}
+        paths = {
+            "$ref": "",
+            "summary": "",
+            "description": "",
+            "servers": [],
+            "parameters": [],
+        }  # type: Dict[str, Union[str, List[Dict], Dict]]
         for rule in self.url_map.iter_rules():
             view_func = self.view_functions[rule.endpoint]
             if hasattr(view_func, "view_class") and issubclass(view_func.view_class, Handler):
@@ -302,8 +283,8 @@ class Flask(_Flask):
             }
 
         # for k, v in components_schemas.items():
-            # components["schemas"][k] = translate_schema_to_openapi(v.schema())
-        components["schemas"] = components_schemas
+        # components["schemas"][k] = translate_schema_to_openapi(v.schema())
+        components["schemas"] = components_schemas.copy()
         return components
 
         # for rule in self.url_map.iter_rules():

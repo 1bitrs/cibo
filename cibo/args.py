@@ -8,12 +8,6 @@ from werkzeug.datastructures import ImmutableMultiDict
 
 from .types import MediaType
 
-# schemas: Dict[str, Any] = dict()
-# responses: Dict[str, Any] = dict()
-# parameters: Dict[str, Any] = dict()
-# request_bodies: Dict[str,  Any] = dict()
-# security_schemes: Dict[str,  Any] = dict()
-
 
 class BaseApiArgs(BaseModel):
     ...
@@ -93,7 +87,7 @@ class BaseApiSuccessResp(BaseApiArgs):
         }
 
     @classmethod
-    def get_openapi_response_body(cls) -> Dict:
+    def get_openapi_response(cls) -> Dict:
         components_responses[cls._schema_alias] = cls
         return {"$ref": f"#/components/responses/{cls._schema_alias}"}
 
@@ -206,18 +200,35 @@ components_responses = dict()  # type: Dict[str, Type[BaseApiSuccessResp]]
 components_schemas = dict()  # type: Dict[str, Type[BaseModel]]
 
 
+def _destory():  # type:ignore
+    global components_parameters
+    global components_request_bodies
+    global components_responses
+    global components_schemas
+
+    components_parameters.clear()
+    components_request_bodies.clear()
+    components_responses.clear()
+    components_schemas.clear()
+
+    del components_parameters
+    del components_request_bodies
+    del components_responses
+    del components_schemas
+
+
 def translate_schema_to_openapi(schema: Dict) -> Dict:
     properties = schema.get("properties", {})
     definitions = schema.get("definitions", {})
-    for k, v in properties.items():
+    for _, v in properties.items():
         if "allOf" in v:
             for all_of in v["allOf"]:
                 if "$ref" in all_of:
-                    _name = all_of['$ref'].split('/')[-1]
+                    _name = all_of["$ref"].split("/")[-1]
                     all_of["$ref"] = f"#/components/schemas/{_name}"
                     components_schemas[_name] = definitions.pop(_name) or {}  # type: ignore
         if "$ref" in v:
-            _name = v['$ref'].split('/')[-1]
-            v['$ref'] = f"#/components/schemas/{_name}"
-        
+            _name = v["$ref"].split("/")[-1]
+            v["$ref"] = f"#/components/schemas/{_name}"
+
     return schema
