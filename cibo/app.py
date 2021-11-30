@@ -257,7 +257,7 @@ class Flask(_Flask):
 
         for k, v in components_parameters.items():
             components["parameters"][k] = {
-                "name": k,
+                "name": k.split("$")[-1],
                 "in": "query",
                 "description": "",
                 "required": True,
@@ -273,10 +273,7 @@ class Flask(_Flask):
                 "required": True,
             }
 
-            translate_schema_to_openapi(v.schema())
-
         for k, v in components_responses.items():
-            v
             components["responses"][k] = {
                 "description": "",
                 "content": {v._content_type: {"schema": translate_schema_to_openapi(v.schema())}},
