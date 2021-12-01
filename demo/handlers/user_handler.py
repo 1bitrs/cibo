@@ -29,16 +29,29 @@ class User(BaseModel):
 @api.post("/user")
 class UserHandler(Handler):
     class Body(BaseApiBody):
+        class Teacher(BaseModel):
+            id: int
+            name: str
+        
         user: User
         inviter: str
-        invitees: List[str]
+        invitees: List[str] = Field(description="邀请到的用户")
+
+        teacher: Teacher
 
     class Resp(BaseApiSuccessResp):
         """用户信息响应"""
 
+        class Teacher(BaseModel):
+            id: int
+            name: str
+            email: str
+
         user: User = Field(description="用户信息")
         inviter: str
         invitees: List[str] = Field(description="邀请到的用户")
+        teacher: Teacher
+
 
     def handle(self, context: SimpleContext, body: Body):
         """handle user"""

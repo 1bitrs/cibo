@@ -10,81 +10,17 @@ from .types import MediaType
 
 
 class BaseApiArgs(BaseModel):
-    ...
-
-
-def get_property(key: str, definitions: dict):
-    """从 definitions 中获取参数定义"""
-    _property = definitions[key]
-    for k, v in _property.get("properties", {}).items():
-        if isinstance(v, dict):
-            if "items" in v and "$ref" in v["items"]:
-                definition_key = v["items"]["$ref"].rsplit("/")[-1]
-                _property["properties"][k]["items"] = get_property(definition_key, definitions)
-            elif "$ref" in v:
-                definition_key = v["$ref"].rsplit("/")[-1]
-                _property["properties"][k] = get_property(definition_key, definitions)
-            elif "allOf" in v:
-                # score_rule: Optional[ScoreRuleSchema]: [{'$ref': '#/definitions/ScoreRuleSchema'}]
-                for index, sub_property in enumerate(v["allOf"]):
-                    if "$ref" in sub_property:
-                        definition_key = sub_property["$ref"].rsplit("/")[-1]
-                        _property["properties"][k]["allOf"][index] = get_property(
-                            definition_key, definitions
-                        )
-                _property["properties"][k].pop("title", "")
-
-    return _property
-
-
-def schema_to_swagger(schema: dict) -> dict:
-    """展开并删除 schema 中自动生成的 definitions"""
-    definitions = schema.get("definitions", {})
-    properties = schema.get("properties", {})
-    for k, v in properties.items():
-        if "items" in v and "$ref" in v["items"]:
-            # rules: List[ScoreRuleItemSchema]
-            # {'title': 'Rules', 'type': 'array', 'items': {'$ref': '#/definitions/ScoreRuleItemSchema'}}
-            definition_key = v["items"]["$ref"].rsplit("/")[-1]
-            properties[k]["items"] = get_property(definition_key, definitions)
-        elif "$ref" in v:
-            definition_key = v["$ref"].rsplit("/")[-1]
-            properties[k] = get_property(definition_key, definitions)
-        elif "allOf" in v:
-            # score_rule: Optional[ScoreRuleSchema]: [{'$ref': '#/definitions/ScoreRuleSchema'}]
-            for index, _ in enumerate(v["allOf"]):
-                if "$ref" in v:
-                    definition_key = v["$ref"].rsplit("/")[-1]
-                    properties[k]["allOf"][index] = get_property(definition_key, definitions)
-
-        properties[k].pop("title", "")
-        properties[k].pop("validator", "")
-    schema["properties"] = properties
-    schema["definitions"] = {}
-    return schema
+    _schema_alias: str
 
 
 class BaseApiSuccessResp(BaseApiArgs):
-    success = True
+    success: bool = True
     status_code = 200
     status_msg = "ok"
     _headers: Dict[str, Any]
     _links: Dict[str, Any]
     _schema_alias: str
     _content_type: MediaType = "application/json"
-
-    @classmethod
-    def translate_schema_to_openapi(cls) -> Dict:
-        return {
-            "description": cls.__doc__ or "Response",
-            "headers": getattr(cls, "_headers", {}),
-            "links": getattr(cls, "_links", {}),
-            "content": {
-                "application/json": {
-                    "schema": {"$ref": f"#/components/schemas/{cls._schema_alias}"}
-                }
-            },
-        }
 
     @classmethod
     def get_openapi_response(cls) -> Dict:
@@ -111,27 +47,6 @@ class BaseApiBody(BaseApiArgs):
 
         return cls.parse_obj(obj_dict)
 
-    # @classmethod
-    # def get_swag_body_param(cls):
-    #     _swagger = schema_to_swagger(cls.schema())
-    #     return {
-    #         "in": "body",
-    #         "name": "body",
-    #         "required": True,
-    #         "description": "请求 Body",
-    #         "schema": _swagger,
-    #     }
-    @classmethod
-    def translate_schema_to_openapi(cls):
-        _schema = cls.schema()
-        return {
-            "schema": {
-                "type": _schema["type"],
-                "required": _schema.get("required", []),
-                "properties": _schema.get("properties", {}),
-            }
-        }
-
     @classmethod
     def get_openapi_request_body(cls):
         components_request_bodies[cls._schema_alias] = cls
@@ -139,6 +54,8 @@ class BaseApiBody(BaseApiArgs):
 
 
 class BaseApiQuery(BaseApiArgs):
+    _schema_alias: str
+
     @classmethod
     def parse_request_args(cls, query: ImmutableMultiDict) -> "BaseApiQuery":
         obj_dict = dict(query)
@@ -158,21 +75,6 @@ class BaseApiQuery(BaseApiArgs):
                         obj_dict[_name] = json.loads(_value)
         return cls.parse_obj(obj_dict)
 
-    _schema_alias: str
-    # @classmethod
-    # def get_swag_query_param(cls) -> List[Dict[str, Union[str, bool]]]:
-    #     _schema = schema_to_swagger(cls.schema())
-    #     properties = _schema.get("properties", {})
-    #     required = _schema.get("required", [])
-    #     params = []
-    #     for k, v in properties.items():
-    #         item = {"in": "query", "name": k}
-    #         for _k, _v in v.items():
-    #             if _k in ["default", "type", "description", "enum"]:
-    #                 item[_k] = _v
-    #         item["required"] = k in required
-    #         params.append(item)
-    #     return params
     @classmethod
     def get_openapi_parameters(cls):
         components_parameters[cls._schema_alias] = cls
@@ -180,24 +82,11 @@ class BaseApiQuery(BaseApiArgs):
             {"$ref": f"#/components/parameters/{cls._schema_alias}"},
         ]
 
-    @classmethod
-    def translate_schema_to_openapi(cls):
-        _schema = cls.schema()
-        return {
-            "name": cls.__name__,
-            "in": "query",
-            "description": cls.__doc__ or "请求 Query",
-            "required": True,
-            "deprecated": False,
-            "allowEmptyValue": False,
-            "schema": _schema,
-        }
-
 
 components_parameters = dict()  # type: Dict[str, Type[BaseApiQuery]]
 components_request_bodies = dict()  # type: Dict[str, Type[BaseApiBody]]
 components_responses = dict()  # type: Dict[str, Type[BaseApiSuccessResp]]
-components_schemas = dict()  # type: Dict[str, Type[BaseModel]]
+components_schemas = dict()  # type: Dict
 
 
 def _destory():  # type:ignore
@@ -217,7 +106,8 @@ def _destory():  # type:ignore
     del components_schemas
 
 
-def translate_schema_to_openapi(schema: Dict) -> Dict:
+def translate_schema_to_openapi(args_class: Type[BaseApiArgs]) -> Dict:
+    schema = args_class.schema()
     properties = schema.get("properties", {})
     definitions = schema.get("definitions", {})
     for _, v in properties.items():
@@ -226,9 +116,19 @@ def translate_schema_to_openapi(schema: Dict) -> Dict:
                 if "$ref" in all_of:
                     _name = all_of["$ref"].split("/")[-1]
                     all_of["$ref"] = f"#/components/schemas/{_name}"
-                    components_schemas[_name] = definitions.pop(_name) or {}  # type: ignore
+                    components_schemas[_name] = definitions.pop(_name) or {}
         if "$ref" in v:
-            _name = v["$ref"].split("/")[-1]
-            v["$ref"] = f"#/components/schemas/{_name}"
+            _name:str = v["$ref"].split("/")[-1]
+            innter_schema_class = getattr(args_class, _name, type)
+            if issubclass(innter_schema_class, BaseModel):
+                # 内部的BaseModel类，避免schema之间重名
+                _name_alias = f"{args_class._schema_alias}${innter_schema_class.__name__}"
+            else:
+                _name_alias = _name
 
+            v["$ref"] = f"#/components/schemas/{_name_alias}"
+            components_schemas[_name_alias] = definitions.pop(_name)
+    
+    if "definitions" in schema:
+        del schema["definitions"]
     return schema

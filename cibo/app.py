@@ -121,12 +121,6 @@ class Flask(_Flask):
             self.register_blueprint(bp)
 
     def _get_spec(self, spec_format: str = "json", force_update=False) -> Union[dict, str]:
-        # a = {}
-        # with open("./cibo/demo.json") as f:
-        #     import json
-
-        #     a = json.loads(f.read())
-        # return a
 
         if not force_update and self._spec:
             return self._spec
@@ -259,54 +253,25 @@ class Flask(_Flask):
             components["parameters"][k] = {
                 "name": k.split("$")[-1],
                 "in": "query",
-                "description": "",
+                "description": v.__doc__ or "",
                 "required": True,
                 "deprecated": False,
                 "allowEmptyValue": False,
-                "schema": translate_schema_to_openapi(v.schema()),
+                "schema": translate_schema_to_openapi(v),
             }
 
         for k, v in components_request_bodies.items():
             components["requestBodies"][k] = {
-                "description": "",
-                "content": {v._content_type: {"schema": translate_schema_to_openapi(v.schema())}},
+                "description": v.__doc__ or "",
+                "content": {v._content_type: {"schema": translate_schema_to_openapi(v)}},
                 "required": True,
             }
 
         for k, v in components_responses.items():
             components["responses"][k] = {
-                "description": "",
-                "content": {v._content_type: {"schema": translate_schema_to_openapi(v.schema())}},
+                "description": v.__doc__ or "",
+                "content": {v._content_type: {"schema": translate_schema_to_openapi(v)}},
             }
 
-        # for k, v in components_schemas.items():
-        # components["schemas"][k] = translate_schema_to_openapi(v.schema())
         components["schemas"] = components_schemas.copy()
         return components
-
-        # for rule in self.url_map.iter_rules():
-        #     view_func = self.view_functions[rule.endpoint]
-        #     if hasattr(view_func, "view_class") and issubclass(view_func.view_class, Handler):
-        #         class_ = view_func.view_class
-        #         resp = getattr(class_, "Resp", None)  # type:BaseApiSuccessResp
-        #         if resp:
-        #             _schema = resp.schema()
-        #             if _schema["type"] == "object":
-        #                 properties = _schema.get("properties", {})
-        #                 components["schemas"][resp._schema_alias] = {
-        #                     "type": "object",
-        #                     "description": resp.__doc__ or "Response",
-        #                     "properties": properties,
-        #                 }
-        #                 definitions = _schema.get("definitions", {})
-        #                 for _property, _value in properties.items():
-        #                     if "allOf" in _value:
-        #                         _definition = definitions.get(_value["title"])
-        #                         components["schemas"][f"{resp._schema_alias}${_value['title']}"] = {
-        #                             "type": _definition["type"],
-        #                             "description": _value["description"],
-        #                             "properties": _definition["properties"],
-        #                         }
-        #                         del _value["allOf"]
-        #                         _value["type"] = "object"
-        # return components

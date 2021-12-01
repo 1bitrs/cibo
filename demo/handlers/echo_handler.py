@@ -14,15 +14,19 @@ class EchoHandler(Handler):
     decorators = [token_auth]
 
     class Query(BaseApiQuery):
-        a: str = Field(description="description of parameter a")
+        """description of Query"""
+        a: str = Field(description="description of parameter a", max_length=20)
         b: Optional[List[int]] = Field(description="description of parameter b")
-        c: Optional[Dict[str, int]] = Field(description="description of parameter a")
+        c: Optional[Dict[str, int]] = Field(description="description of parameter c")
 
     class Body(BaseApiBody):
+        """description of Body"""
         d: Set[int] = Field(description="description of parameter d")
         e: Tuple[Dict[int, List], Dict[int, List]]
+        f: Optional[int] = Field(default=0, gt=-1, lt=10)
 
     class Resp(BaseApiSuccessResp):
+        """description of Response"""
         a: str = Field(description="description of a")
         b: Optional[List[int]] = Field(description="description of b")
         c: Optional[Dict[str, int]] = Field(description="description of c")
@@ -32,5 +36,5 @@ class EchoHandler(Handler):
     def handle(self, context: SimpleContext, query: Query, body: Body):
         """echo the recevied params"""
         return context.success(
-            data=f"a: {query.a}, b: {query.b}, c: {query.c}, d: {body.d}, e: {body.e}"
+            data=f"a: {query.a}, b: {query.b}, c: {query.c}, d: {body.d}, e: {body.e}, f: {body.f}"
         )
