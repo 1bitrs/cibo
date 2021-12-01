@@ -32,7 +32,7 @@ class UserHandler(Handler):
         class Teacher(BaseModel):
             id: int
             name: str
-        
+
         user: User
         inviter: str
         invitees: List[str] = Field(description="邀请到的用户")
@@ -51,7 +51,6 @@ class UserHandler(Handler):
         inviter: str
         invitees: List[str] = Field(description="邀请到的用户")
         teacher: Teacher
-
 
     def handle(self, context: SimpleContext, body: Body):
         """handle user"""

@@ -24,7 +24,7 @@ def handle_internal_server_error(e: InternalServerError):
 
 
 def _binding_route_rule():
-    from . import health_check_handler, echo_handler, user_handler  # type: ignore
+    from . import echo_handler, health_check_handler, user_handler  # type: ignore
 
 
 _binding_route_rule()

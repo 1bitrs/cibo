@@ -118,7 +118,7 @@ def translate_schema_to_openapi(args_class: Type[BaseApiArgs]) -> Dict:
                     all_of["$ref"] = f"#/components/schemas/{_name}"
                     components_schemas[_name] = definitions.pop(_name) or {}
         if "$ref" in v:
-            _name:str = v["$ref"].split("/")[-1]
+            _name: str = v["$ref"].split("/")[-1]
             innter_schema_class = getattr(args_class, _name, type)
             if issubclass(innter_schema_class, BaseModel):
                 # 内部的BaseModel类，避免schema之间重名
@@ -128,7 +128,7 @@ def translate_schema_to_openapi(args_class: Type[BaseApiArgs]) -> Dict:
 
             v["$ref"] = f"#/components/schemas/{_name_alias}"
             components_schemas[_name_alias] = definitions.pop(_name)
-    
+
     if "definitions" in schema:
         del schema["definitions"]
     return schema
