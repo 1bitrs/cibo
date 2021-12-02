@@ -180,7 +180,7 @@ class Flask(_Flask):
         for blueprint_name, blueprint in self.blueprints.items():
             if blueprint_name == "_openapi":
                 continue
-            _tag = getattr(blueprint, "openapi_tag", None)  # type: Union[dict, str]
+            _tag = getattr(blueprint, "openapi_tag", None)  # type: Optional[Union[dict, str]]
             if _tag:
                 if isinstance(_tag, dict):
                     tag = _tag

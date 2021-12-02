@@ -11,7 +11,7 @@ def get_tag(
 ) -> Dict[str, Any]:
     """Get tag from blueprint objec"""
     tag: Dict[str, Any]
-    _tag = getattr(blueprint, "openapi_tag", None)  # type: Union[dict, str]
+    _tag = getattr(blueprint, "openapi_tag", None)  # type: Optional[Union[dict, str]]
     if _tag:
         if isinstance(_tag, dict):
             tag = _tag
@@ -28,7 +28,7 @@ def get_operation_tags(
 ) -> List[str]:
     """Get operation tag from blueprint objec"""
     tags: List[str]
-    tag = getattr(blueprint, "tag", None)  # type: Union[dict, str]
+    tag = getattr(blueprint, "tag", None)  # type: Optional[Union[dict, str]]
     if tag:
         if isinstance(tag, dict):
             tags = [tag["name"]]

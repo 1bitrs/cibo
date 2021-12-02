@@ -1,3 +1,5 @@
+from typing import cast
+
 from pydantic import ValidationError
 from werkzeug.exceptions import InternalServerError
 
@@ -20,7 +22,7 @@ def handle_auth_exception(e: AuthException):
 
 @api.errorhandler(InternalServerError)
 def handle_internal_server_error(e: InternalServerError):
-    return ErrorContext().error("服务器错误", e.code)
+    return ErrorContext().error("服务器错误", cast(int, e.code))
 
 
 def _binding_route_rule():

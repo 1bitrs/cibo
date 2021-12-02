@@ -1,6 +1,6 @@
 import inspect
 from functools import wraps
-from typing import Callable, Dict, Type
+from typing import Callable, Dict, Optional, Type
 
 from flask import g, request
 from pydantic import BaseModel
@@ -17,25 +17,29 @@ def inject_args_decorator(cls: Type[Handler]) -> Callable:
         func_sig = inspect.signature(view_func, follow_wrapped=True)
         if "context" not in func_sig.parameters:
             raise Exception(f"param `context` does't found in `{view_func}`")
-        if not issubclass(func_sig.parameters.get("context").annotation, cls.context_cls):
+        context = func_sig.parameters.get("context")
+        if not context:
+            raise Exception("Not Found context")
+        if not issubclass(context.annotation, cls.context_cls):
             # if _context is not sig.parameters.get("context").annotation:
-            raise Exception(
-                f"`{func_sig.parameters.get('context').name}` must specify annotation `{cls.context_cls}`"
-            )
+            raise Exception(f"`{context.name}` must specify annotation `{cls.context_cls}`")
 
         parameter_map = {}  # type: Dict[str, Type[BaseModel]]
-        Query = getattr(cls, "Query", None)  # type: Type[BaseApiQuery]
-        Body = getattr(cls, "Body", None)  # type: Type[BaseApiBody]
+        Query = getattr(cls, "Query", None)  # type: Optional[Type[BaseApiQuery]]
+        Body = getattr(cls, "Body", None)  # type: Optional[Type[BaseApiBody]]
 
         def _validate_query_and_body_parameters(type_: str, class_, parameter_map: Dict):
             if type_ in func_sig.parameters:
+                api_args = func_sig.parameters.get(type_)
+                if not api_args:
+                    raise
                 if not class_:
                     raise Exception(
                         f"`query` exists in {cls.handle_func_name}'s params but `{class_.__name__}` not found in `class {cls.__name__}`"
                     )
                 elif not issubclass(class_, BaseModel):
                     raise Exception(f"{class_.__name__} object is not subclass of BaseModel")
-                elif func_sig.parameters.get(type_).annotation is not class_:
+                elif api_args.annotation is not class_:
                     raise Exception(f"parameter query type not match cls.{class_.__name__}")
                 else:
                     parameter_map[type_] = class_
@@ -52,7 +56,7 @@ def inject_args_decorator(cls: Type[Handler]) -> Callable:
             if "query" in parameter_map:
                 query = request.args
                 parameters["query"] = Query.parse_request_args(query)  # type:ignore
-            if "body" in parameter_map:
+            if "body" in parameter_map and Body:
                 if request.content_type == "application/json":
                     body = dict(request.json) if request.json else {}
                     parameters["body"] = Body.parse_obj(body)
