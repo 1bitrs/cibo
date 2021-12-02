@@ -273,5 +273,7 @@ class Flask(_Flask):
                 "content": {v._content_type: {"schema": translate_schema_to_openapi(v)}},
             }
 
-        components["schemas"] = components_schemas.copy()
+        for k, v in components_schemas.items():
+            components["schemas"][k] = translate_schema_to_openapi(v)
+        # components["schemas"] = components_schemas.copy()
         return components

@@ -1,7 +1,7 @@
 import json
 import re
 from ast import literal_eval
-from typing import Any, Dict, Optional, Type
+from typing import Any, Dict, List, Optional, Type, Union
 
 from pydantic import BaseModel
 from werkzeug.datastructures import ImmutableMultiDict
@@ -86,7 +86,7 @@ class BaseApiQuery(BaseApiArgs):
 components_parameters = dict()  # type: Dict[str, Type[BaseApiQuery]]
 components_request_bodies = dict()  # type: Dict[str, Type[BaseApiBody]]
 components_responses = dict()  # type: Dict[str, Type[BaseApiSuccessResp]]
-components_schemas = dict()  # type: Dict
+components_schemas = dict()  # type: Dict[str, Dict]
 
 
 def _destory():  # type:ignore
@@ -106,29 +106,107 @@ def _destory():  # type:ignore
     del components_schemas
 
 
-def translate_schema_to_openapi(args_class: Type[BaseApiArgs]) -> Dict:
-    schema = args_class.schema()
+def translate_schema_to_openapi(args_class) -> Dict[str, Union[str, bool, int, List, Dict]]:
+    if type(args_class) is dict:
+        schema = args_class
+    else:
+        schema = args_class.schema()
     properties = schema.get("properties", {})
     definitions = schema.get("definitions", {})
-    for _, v in properties.items():
-        if "allOf" in v:
-            for all_of in v["allOf"]:
-                if "$ref" in all_of:
-                    _name = all_of["$ref"].split("/")[-1]
-                    all_of["$ref"] = f"#/components/schemas/{_name}"
-                    components_schemas[_name] = definitions.pop(_name) or {}
-        if "$ref" in v:
-            _name: str = v["$ref"].split("/")[-1]
-            innter_schema_class = getattr(args_class, _name, type)
-            if issubclass(innter_schema_class, BaseModel):
-                # 内部的BaseModel类，避免schema之间重名
-                _name_alias = f"{args_class._schema_alias}${innter_schema_class.__name__}"
-            else:
-                _name_alias = _name
 
-            v["$ref"] = f"#/components/schemas/{_name_alias}"
-            components_schemas[_name_alias] = definitions.pop(_name)
+    def _handle_array(v: Dict):
+        items = v.get("items", None)  # type: Optional[Union[List, Dict]]
+        if not items:
+            return
+        elif type(items) is list:
+            return
+        elif type(items) is dict:
+            if "$ref" in items:
+                _handle_ref(items)
+            elif items["type"] == "object":
+                _handle_object(items)
+
+    def _handle_object(v: Dict[str, Dict]):
+        if "additionalProperties" in v:
+            if "$ref" in v["additionalProperties"]:
+                _handle_ref(v["additionalProperties"])
+
+    def _handle_ref(value: Dict):
+        _name: str = value["$ref"].split("/")[-1]
+        innter_schema_class = getattr(args_class, _name, type)
+        if issubclass(innter_schema_class, BaseModel):
+            # 在Query、Body、Resp内部的BaseModel类，避免schema之间重名
+            _name_alias = f"{args_class._schema_alias}${innter_schema_class.__name__}"
+        else:
+            _name_alias = _name
+
+        value["$ref"] = f"#/components/schemas/{_name_alias}"
+        if _name in definitions:
+            definition = definitions.pop(_name)
+            components_schemas[_name_alias] = _handle_definitions(definition)
+
+    def _handle_all_of(all_of_list: List[Dict[str, str]]):
+        for all_of in all_of_list:
+            if "$ref" in all_of:
+                _handle_ref(all_of)
+
+    def _handle_definitions(v: Dict[str, Dict]):
+        return translate_schema_to_openapi(v)
+
+    for _, v in properties.items():
+        if v.get("type") == "object":
+            _handle_object(v)
+        elif v.get("type") == "array":
+            _handle_array(v)
+        elif v.get("$ref"):
+            _handle_ref(v)
+        elif v.get("allOf"):
+            _handle_all_of(v["allOf"])
+
+    if definitions:
+        components_schemas.update(definitions)
 
     if "definitions" in schema:
         del schema["definitions"]
+
     return schema
+
+
+# def translate_schema_to_openapi(args_class: Type[BaseApiArgs]) -> Dict:
+#     schema = args_class.schema()
+#     properties = schema.get("properties", {})
+#     definitions = schema.get("definitions", {})
+#     for _, v in properties.items():
+#         if "allOf" in v:
+#             for all_of in v["allOf"]:
+#                 if "$ref" in all_of:
+#                     _name = all_of["$ref"].split("/")[-1]
+#                     all_of["$ref"] = f"#/components/schemas/{_name}"
+#                     components_schemas[_name] = definitions.pop(_name) or {}
+#         if "$ref" in v:
+#             _name: str = v["$ref"].split("/")[-1]
+#             innter_schema_class = getattr(args_class, _name, type)
+#             if issubclass(innter_schema_class, BaseModel):
+#                 # 内部的BaseModel类，避免schema之间重名
+#                 _name_alias = f"{args_class._schema_alias}${innter_schema_class.__name__}"
+#             else:
+#                 _name_alias = _name
+
+#             v["$ref"] = f"#/components/schemas/{_name_alias}"
+#             components_schemas[_name_alias] = definitions.pop(_name)
+#         if "items" in v:
+#             if "$ref" in v["items"]:
+#                 _name: str = v["items"]["$ref"].split("/")[-1]
+#                 innter_schema_class = getattr(args_class, _name, type)
+#                 if issubclass(innter_schema_class, BaseModel):
+#                     # 内部的BaseModel类，避免schema之间重名
+#                     _name_alias = f"{args_class._schema_alias}${innter_schema_class.__name__}"
+#                 else:
+#                     _name_alias = _name
+
+#                 v["items"]["$ref"] = f"#/components/schemas/{_name_alias}"
+#                 components_schemas[_name_alias] = definitions.pop(_name)
+
+#     if "definitions" in schema:
+#         del schema["definitions"]
+#     return schema
