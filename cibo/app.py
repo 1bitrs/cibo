@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional, Type, Union, cast
 
-from apispec import APISpec
+from apispec.core import APISpec
 from flask import Flask as _Flask
 from flask import render_template_string
 
@@ -273,7 +273,8 @@ class Flask(_Flask):
                 "content": {v._content_type: {"schema": translate_schema_to_openapi(v)}},
             }
 
-        for k, v in components_schemas.items():
+        while components_schemas:
+            k, v = components_schemas.popitem()
             components["schemas"][k] = translate_schema_to_openapi(v)
-        # components["schemas"] = components_schemas.copy()
+
         return components

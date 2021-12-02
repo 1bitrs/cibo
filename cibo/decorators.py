@@ -32,7 +32,7 @@ def inject_args_decorator(cls: Type[Handler]) -> Callable:
             if type_ in func_sig.parameters:
                 api_args = func_sig.parameters.get(type_)
                 if not api_args:
-                    raise
+                    raise Exception()
                 if not class_:
                     raise Exception(
                         f"`query` exists in {cls.handle_func_name}'s params but `{class_.__name__}` not found in `class {cls.__name__}`"

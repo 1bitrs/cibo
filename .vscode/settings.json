@@ -1,7 +1,4 @@
 {
-    // "python.condaPath": "/home/yangfan/miniconda3/envs/cibo/bin",  
-    // "python.pythonPath": "/home/yangfan/miniconda3/envs/cibo/bin/python",
-    // "python.defaultInterpreterPath": "/home/yangfan/miniconda3/envs/cibo/bin/python",
     "terminal.integrated.defaultProfile.osx": "zsh",
     "terminal.integrated.defaultProfile.linux": "zsh",
     "python.languageServer": "None",
