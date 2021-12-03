@@ -45,6 +45,7 @@ setup(
         "Flask==1.1.1",
         "pydantic==1.6.2",
         "apispec==5.0.0",
+        "typing-extensions==3.10.0.2"
     ],
     classifiers=[
         "Intended Audience :: Developers",
