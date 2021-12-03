@@ -21,7 +21,7 @@ file_text = read(fpath("cibo/__init__.py"))
 
 
 def grep(attrname):
-    pattern = r'{0}\W*=\W*"([^\']+)"'.format(attrname)
+    pattern = r'{0}\W*=\W*"([^\'\n]+)"'.format(attrname)
     (strval,) = re.findall(pattern, file_text)
     return strval
 
