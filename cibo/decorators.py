@@ -5,7 +5,7 @@ from typing import Callable, Dict, Optional, Type
 from flask import g, request
 from pydantic import BaseModel
 
-from .args import BaseApiBody, BaseApiQuery
+from .args import BaseApiBody, BaseApiPath, BaseApiQuery
 from .handler import Handler
 
 
@@ -27,6 +27,7 @@ def inject_args_decorator(cls: Type[Handler]) -> Callable:
         parameter_map = {}  # type: Dict[str, Type[BaseModel]]
         Query = getattr(cls, "Query", None)  # type: Optional[Type[BaseApiQuery]]
         Body = getattr(cls, "Body", None)  # type: Optional[Type[BaseApiBody]]
+        Path = getattr(cls, "Path", None)  # type: Optional[Type[BaseApiPath]]
 
         def _validate_query_and_body_parameters(type_: str, class_, parameter_map: Dict):
             if type_ in func_sig.parameters:
@@ -49,6 +50,7 @@ def inject_args_decorator(cls: Type[Handler]) -> Callable:
 
         _validate_query_and_body_parameters("query", Query, parameter_map)
         _validate_query_and_body_parameters("body", Body, parameter_map)
+        _validate_query_and_body_parameters("path", Path, parameter_map)
 
         @wraps(fn)
         def wrapper(*args, **kwargs):
@@ -65,6 +67,12 @@ def inject_args_decorator(cls: Type[Handler]) -> Callable:
                     parameters["body"] = body
                 else:
                     parameters["body"] = {}
+            if "path" in parameter_map and Path:
+                parameters["path"] = Path.parse_path_args(request.view_args)
+                for k, _ in request.view_args.items():
+                    if k in kwargs:
+                        del kwargs[k]
+                request.view_args.clear()
 
             return fn(*args, **kwargs, **parameters)
 

@@ -3,8 +3,8 @@ from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
-from cibo import BaseApiBody, Handler, SimpleContext
-from cibo.args import BaseApiSuccessResp
+from cibo import BaseApiBody, BaseApiQuery, Handler, SimpleContext
+from cibo.args import BaseApiPath, BaseApiSuccessResp
 from demo.handlers import api
 
 
@@ -50,8 +50,18 @@ class UserHandler(Handler):
         user: User = Field(description="用户信息")
         inviter: str
         invitees: List[str] = Field(description="邀请到的用户")
-        teacher: Teacher
+        teachers: List[Dict[str, Teacher]]
 
     def handle(self, context: SimpleContext, body: Body):
         """handle user"""
         return context.success(user=body.user, inviter=body.inviter, invitees=body.invitees)
+
+
+@api.get("/user/<int:id>/<string:name>")
+class UserNameHandler(Handler):
+    class Path(BaseApiPath):
+        id: int
+        name: str
+
+    def handle(self, context: SimpleContext, path: Path):
+        pass

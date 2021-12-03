@@ -13,6 +13,12 @@ class BaseApiArgs(BaseModel):
     _schema_alias: str
 
 
+class BaseApiPath(BaseApiArgs):
+    @classmethod
+    def parse_path_args(cls, path: dict) -> "BaseApiPath":
+        return cls.parse_obj(path)
+
+
 class BaseApiSuccessResp(BaseApiArgs):
     success: bool = True
     status_code = 200
@@ -87,7 +93,7 @@ components_parameters = dict()  # type: Dict[str, Type[BaseApiQuery]]
 components_request_bodies = dict()  # type: Dict[str, Type[BaseApiBody]]
 components_responses = dict()  # type: Dict[str, Type[BaseApiSuccessResp]]
 components_schemas = dict()  # type: Dict[str, Union[Type[BaseModel], dict]]
-_extra_definitions = dict()
+_extra_definitions = dict()  # type: Dict[str, Dict]
 
 
 def _destory():  # type:ignore
