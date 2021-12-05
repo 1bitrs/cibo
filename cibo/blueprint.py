@@ -2,7 +2,7 @@ from typing import Optional, Type, Union
 
 from flask.blueprints import Blueprint as _Blueprint
 
-from .args import BaseApiBody, BaseApiQuery, BaseApiSuccessResp
+from .args import BaseApiBody, BaseApiPath, BaseApiQuery, BaseApiSuccessResp
 from .decorators import inject_args_decorator, inject_context_decorator
 from .handler import Handler
 
@@ -43,13 +43,17 @@ class Blueprint(_Blueprint):
 
     @staticmethod
     def _parse_parameters_and_responses(_cls: Type[Handler]):
+        Path = getattr(_cls, "Path", None)  # type: Optional[Type[BaseApiPath]]
         Query = getattr(_cls, "Query", None)  # type: Optional[Type[BaseApiQuery]]
         Body = getattr(_cls, "Body", None)  # type: Optional[Type[BaseApiBody]]
         Resp = getattr(_cls, "Resp", None)  # type: Optional[Type[BaseApiSuccessResp]]
 
+        setattr(_cls, "path", list())
         setattr(_cls, "responses", dict())
         setattr(_cls, "parameters", list())
         setattr(_cls, "request_body", dict())
+        if Path:
+            _cls.path = Path.get_openapi_path()
         if Query:
             setattr(Query, "_schema_alias", f"{_cls.__name__}${Query.__name__}")
             _cls.parameters.extend(Query.get_openapi_parameters())

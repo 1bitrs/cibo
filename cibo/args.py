@@ -18,6 +18,25 @@ class BaseApiPath(BaseApiArgs):
     def parse_path_args(cls, path: dict) -> "BaseApiPath":
         return cls.parse_obj(path)
 
+    @classmethod
+    def get_openapi_path(cls) -> List[Dict]:
+        properties = cls.schema().get("properties", {})
+        required = cls.schema().get("required", [])
+        _schema = list()
+        for k, v in properties.items():
+            _schema.append(
+                {
+                    "in": "path",
+                    "required": k in required,
+                    "name": k,
+                    "description": v.get("description", ""),
+                    "schema": {"type": v.get("type")},
+                    "styple": "simple",
+                }
+            )
+
+        return _schema
+
 
 class BaseApiSuccessResp(BaseApiArgs):
     success: bool = True

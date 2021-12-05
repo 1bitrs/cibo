@@ -20,6 +20,7 @@ class Handler(MethodView):
     Query: Optional[BaseModel] = None
     Body: Optional[BaseModel] = None
 
+    path: List
     parameters: List[Dict]
     request_body: Dict
     responses: Dict

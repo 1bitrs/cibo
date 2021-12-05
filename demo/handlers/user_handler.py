@@ -57,11 +57,12 @@ class UserHandler(Handler):
         return context.success(user=body.user, inviter=body.inviter, invitees=body.invitees)
 
 
-@api.get("/user/<int:id>/<string:name>")
-class UserNameHandler(Handler):
+@api.get("/callback/<int:id>/<string:suffix>")
+class CallBackHandler(Handler):
     class Path(BaseApiPath):
-        id: int
-        name: str
+        id: int = Field(description="description of id")
+        suffix: str = Field(description="description of suffix")
 
     def handle(self, context: SimpleContext, path: Path):
-        pass
+        """handle callback"""
+        return context.success(id=path.id, suffix=path.suffix)

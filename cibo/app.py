@@ -144,8 +144,8 @@ class Flask(_Flask):
             openapi_version=self.openapi,
             info=self._make_info(),
             tags=self._make_tags(),
-            paths=self._make_paths(),
             components=self._make_components(),
+            paths=self._make_paths(),
             **kwargs,
         )
         from .args import _destory
@@ -225,7 +225,8 @@ class Flask(_Flask):
                             "parameters": class_.parameters,
                             "requestBody": class_.request_body,
                             "responses": class_.responses,
-                        }
+                        },
+                        "parameters": getattr(class_, "path", []),
                     }
         return paths
 
