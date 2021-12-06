@@ -217,17 +217,22 @@ class Flask(_Flask):
                         f"{class_.__name__} must have function {class_.handle_func_name}"
                     )
                 blueprint = self.blueprints[rule.endpoint.split(".")[0]]  # type: Blueprint
+                _rule = cast(str, rule.rule)
+                paths[_rule] = paths.get(_rule, {})
+                _path_rule = cast(Dict, paths[_rule])
                 for method in class_.methods:
-                    paths[rule.rule] = {
-                        method.lower(): {
-                            "tags": [blueprint.openapi_tag],
-                            "summary": func.__doc__,
-                            "parameters": class_.parameters,
-                            "requestBody": class_.request_body,
-                            "responses": class_.responses,
-                        },
-                        "parameters": getattr(class_, "path", []),
-                    }
+                    _path_rule.update(
+                        {
+                            method.lower(): {
+                                "tags": [blueprint.openapi_tag],
+                                "summary": func.__doc__,
+                                "parameters": class_.parameters,
+                                "requestBody": class_.request_body,
+                                "responses": class_.responses,
+                            },
+                            "parameters": getattr(class_, "path", []),
+                        }
+                    )
         return paths
 
     def _make_components(self) -> dict:

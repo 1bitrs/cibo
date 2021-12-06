@@ -4,7 +4,7 @@ from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
 
 from cibo import BaseApiBody, Handler, SimpleContext
-from cibo.args import BaseApiPath, BaseApiSuccessResp
+from cibo.args import BaseApiPath, BaseApiQuery, BaseApiSuccessResp
 from demo.handlers import api
 
 
@@ -58,11 +58,28 @@ class UserHandler(Handler):
 
 
 @api.get("/callback/<int:id>/<string:suffix>")
-class CallBackHandler(Handler):
+class GetCallBackHandler(Handler):
     class Path(BaseApiPath):
         id: int = Field(description="description of id")
         suffix: str = Field(description="description of suffix")
 
-    def handle(self, context: SimpleContext, path: Path):
+    class Query(BaseApiQuery):
+        echostr: str
+
+    def handle(self, context: SimpleContext, path: Path, query: Query):
+        """handle callback"""
+        return context.success(id=path.id, suffix=path.suffix)
+
+
+@api.post("/callback/<int:id>/<string:suffix>")
+class PostCallBackHandler(Handler):
+    class Path(BaseApiPath):
+        id: int = Field(description="description of id")
+        suffix: str = Field(description="description of suffix")
+
+    class Body(BaseApiBody):
+        msg: Dict[str, str]
+
+    def handle(self, context: SimpleContext, path: Path, body: Body):
         """handle callback"""
         return context.success(id=path.id, suffix=path.suffix)
