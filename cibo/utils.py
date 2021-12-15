@@ -9,7 +9,6 @@ def success(
     status_message: str = "ok", status_code: int = 200, jsonify_func=None, **data
 ) -> Tuple[Response, int]:
     """返回成功数据"""
-    # traces.label(success_status=True, status_code=status_code, status_message=status_message)
     if status_code < 200 or status_code > 299:
         raise ValueError("success status_code should be 200~299")
     res_data = dict(
@@ -53,15 +52,8 @@ def error(
     status_message: str = "error", status_code: int = 400, jsonify_func=None, *, data: dict = None
 ) -> Tuple[Response, int]:
     """返回失败信息"""
-    # 14776338 = 62^4+1, 916132832 = 62^5
     n = randint(14776338, 916132832)
     error_hint = base62_encode(n)
-    # traces.label(
-    #     success_status=False,
-    #     status_code=status_code,
-    #     status_message=status_message,
-    #     error_hint=error_hint,
-    # )
     if status_code >= 200 and status_code <= 299:
         raise ValueError("error status_code can not be 2XX")
     res_data = DCommonErrorResp(

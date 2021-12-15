@@ -22,11 +22,11 @@
       "venv": false,
       "**/.gitlab": false,
       "**/.mypy_cache": false,
-      "build": false,
-      "dist": false,
-      "*.egg-info": false,
+      "build": true,
+      "dist": true,
+      "*.egg-info": true,
       ".pytest_cache": true,
-      ".github": true
+      ".github": true,
     },
     "files.watcherExclude": {
       "**/.git": true,

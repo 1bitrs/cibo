@@ -6,6 +6,8 @@ from .args import BaseApiBody, BaseApiPath, BaseApiQuery, BaseApiSuccessResp
 from .decorators import inject_args_decorator, inject_context_decorator
 from .handler import Handler
 
+__all__ = ["Blueprint"]
+
 
 class Blueprint(_Blueprint):
     def __init__(

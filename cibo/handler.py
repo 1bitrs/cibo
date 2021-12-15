@@ -7,6 +7,8 @@ from typing_extensions import Literal
 from .context import Context
 from .types import TCorsConfig
 
+__all__ = ["Handler"]
+
 
 class Handler(MethodView):
 

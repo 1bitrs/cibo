@@ -9,6 +9,8 @@ from cibo.handler import Handler
 from .blueprint import Blueprint
 from .ui_templates import DOCS_TEMPLATE, OAUTH2_REDIRECT_TEMPLATE, REDOC_TEMPLATE
 
+__all__ = ["Flask"]
+
 
 class Flask(_Flask):
     openapi_version: str
