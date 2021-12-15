@@ -185,6 +185,11 @@ def translate_schema_to_openapi(args_class: Union[Type[BaseModel], dict]) -> dic
             if "$ref" in all_of:
                 _handle_ref(all_of)
 
+    def _handle_any_of(any_of_list: List[Dict[str, str]]):
+        for any_of in any_of_list:
+            if "$ref" in any_of:
+                _handle_ref(any_of)
+
     for _, v in properties.items():
         if v.get("type") == "object":
             _handle_object(v)
@@ -194,6 +199,8 @@ def translate_schema_to_openapi(args_class: Union[Type[BaseModel], dict]) -> dic
             _handle_ref(v)
         elif v.get("allOf"):
             _handle_all_of(v["allOf"])
+        elif v.get("anyOf"):
+            _handle_any_of(v["anyOf"])
 
     if "definitions" in schema:
         _extra_definitions.update(schema["definitions"])

@@ -1,5 +1,5 @@
 import re
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -83,3 +83,26 @@ class PostCallBackHandler(Handler):
     def handle(self, context: SimpleContext, path: Path, body: Body):
         """handle callback"""
         return context.success(id=path.id, suffix=path.suffix)
+
+
+class UserSchema(BaseModel):
+    name: str = Field(min_length=1, max_length=16)
+    passwd: str = Field(min_length=8, max_length=100)
+
+
+class PetSchema(BaseModel):
+    owner: str = Field(min_length=1, max_length=16)
+    age: int
+
+
+@api.post("/union_user")
+class UnionHandler(Handler):
+    class Body(BaseApiBody):
+        data: Union[UserSchema, PetSchema]
+
+    class Resp(BaseApiSuccessResp):
+        data: Optional[UserSchema]
+
+    def handle(self, context: SimpleContext, body: Body):
+        """handle pet union user"""
+        return context.success(data=None)
