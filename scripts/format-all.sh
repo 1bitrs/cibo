@@ -12,11 +12,11 @@ ROOT="$DIR/.."
 
 # black 和 isort 的配置都在 pyproject.toml 中
 echo -e "${Y}Runnning black...${N}"
-black -v $ROOT/cibo
+black -v $ROOT/src
 black -v $ROOT/scripts
 black -v $ROOT/demo
 black -v $ROOT/tests
 
 
 echo -e "${Y}Runnning isort...${N}"
-isort "$ROOT/cibo/" "$ROOT/scripts/" "$ROOT/demo/" "$ROOT/tests/"
+isort "$ROOT/src/" "$ROOT/scripts/" "$ROOT/demo/" "$ROOT/tests/"
