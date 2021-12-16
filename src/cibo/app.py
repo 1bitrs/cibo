@@ -4,9 +4,8 @@ from apispec.core import APISpec
 from flask import Flask as _Flask
 from flask import render_template_string
 
-from .handler import Handler
-
 from .blueprint import Blueprint
+from .handler import Handler
 from .ui_templates import DOCS_TEMPLATE, OAUTH2_REDIRECT_TEMPLATE, REDOC_TEMPLATE
 
 __all__ = ["Flask"]
