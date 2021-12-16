@@ -4,7 +4,7 @@ from apispec.core import APISpec
 from flask import Flask as _Flask
 from flask import render_template_string
 
-from cibo.handler import Handler
+from .handler import Handler
 
 from .blueprint import Blueprint
 from .ui_templates import DOCS_TEMPLATE, OAUTH2_REDIRECT_TEMPLATE, REDOC_TEMPLATE
