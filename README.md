@@ -81,3 +81,14 @@ git submodule update --init --recursive
 ## Docs
 [http://127.0.0.1:5000/docs](http://127.0.0.1:5000/docs)
 
+## Contributing Guide
+### First time setup
+Create a virtual environment and install requirements:
+```bash
+$ python3 -m venv env
+$ source env/bin/activate
+$ python -m pip install --upgrade pip setuptools
+$ pip install -r requirements/dev.txt
+$ pip install -e .
+$ pre-commit install
+```

@@ -4,11 +4,17 @@ from setuptools import setup
 setup(
     name="cibo",
     install_requires=[
-        "Flask==1.1.1",
-        "pydantic==1.6.2",
-        "apispec==5.0.0",
-        "typing-extensions==3.10.0.2"
+        "flask >= 1.1.2",
+        "pydantic >= 1.6.2",
+        "apispec",
+        "typing-extensions; python_version < '3.8'"
+    ],
+    tests_require=[
+        "openapi-spec-validator",
     ],
     extras_require={
+        'dotenv': ['python-dotenv'],
+        'yaml': ['pyyaml'],
+        'async': ['asgiref >= 3.2'],
     },
 )
