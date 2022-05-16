@@ -19,7 +19,7 @@
       ".tox": true,
       ".github": true,
       ".coverage": true,
-      "*.egg-info": true,
+      "**/*.egg-info": true,
       ".pytest_cache": true,
       "**/__pycache__": true,
       "venv": true,

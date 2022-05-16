@@ -20,11 +20,10 @@ before_install:
 before_script:
   - pip install -r requirements-dev.txt
 
-script: 
+script:
   - black -v src --check
   - black -v demo --check
   - black -v tests --check
   - black -v scripts --check
   - isort --check "src/" "demo/" "tests/" "scripts/"
   - pyright
-
