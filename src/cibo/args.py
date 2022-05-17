@@ -176,7 +176,8 @@ def translate_schema_to_openapi(args_class: Union[Type[BaseModel], dict]) -> dic
             if _name in definitions:
                 components_schemas[_name_alias] = definitions.pop(_name)
             else:
-                components_schemas[_name_alias] = _extra_definitions.pop(_name)
+                if _name in _extra_definitions:
+                    components_schemas[_name_alias] = _extra_definitions.pop(_name)
 
         value["$ref"] = f"#/components/schemas/{_name_alias}"
 
